@@ -21,6 +21,9 @@ from scipy.optimize import fsolve
 from scipy.optimize import curve_fit
 from lmfit import minimize, Parameters, fit_report
 import fitz
+import sys
+
+
 
 LARGE_FONT = ("CMU Serif", 16)
 NORM_FONT = ("CMU Serif", 10)
@@ -81,10 +84,10 @@ def smoothfunc(y, box_pts):
 class SeaofBTCapp(tk.Tk):
 
     def __init__(self, *args, **kwargs):
-
+        global application_path
         tk.Tk.__init__(self, *args, **kwargs)
 
-        tk.Tk.iconbitmap(self, default='tkinterstuff\logo.ico')
+        tk.Tk.iconbitmap(self, default="tkinterstuff\logo.ico")
         tk.Tk.wm_title(self, "RFP")
         tk.Tk.wm_geometry(self, self.geometry())
         #change the background color
@@ -126,7 +129,7 @@ class SeaofBTCapp(tk.Tk):
         # helpmenu.add_command(label="How to read real data files",command=lambda: self.read_pdf("tkinterstuff\RealDataFiles.pdf"))
         # helpmenu.add_command(label="How real data is fitted",command=lambda: self.read_pdf("tkinterstuff\RealDataFitted.pdf"))
         # helpmenu.add_separator()
-        helpmenu.add_command(label="Contact",command=lambda: tk.messagebox.showinfo(title="Contact",message="Beta 1.0.0\nMSc. I. Lobato \nlobato31415@gmail.com"))
+        helpmenu.add_command(label="Contact",command=lambda: tk.messagebox.showinfo(title="Contact",message="Beta 1.0.1\nMSc. I. Lobato \nlobato31415@gmail.com"))
         
         menubar.add_cascade(label="Help",menu=helpmenu)
         # telling the program: hey, this is the menu
@@ -450,13 +453,13 @@ class Workspace(Windows):
         self.a.set_title(plotlabels[2])
         #add plotlabels[3] as a label for the colorbar
         if self.cbar!=None:
-            self.cbar.ax.set_xlabel(plotlabels[3])
+            self.cbar.ax.set_title(plotlabels[3])
         #put the grid
         self.a.grid(grid_bool[0])
         self.canvas.draw()
         for i in self.informationchart_list:
             i.update()
-    def onepointfit(self,i,axis,draw_canvas):
+    def onepointfit(self,i,index_crop,axis,draw_canvas):
         global guessdelay
         global xlabel_onepointfitwindow
         global ylabel_onepointfitwindow
@@ -464,8 +467,8 @@ class Workspace(Windows):
 
         xmin,xmax=axis[1].get_xlim()
         cond=np.logical_and(self.freq[i]>xmin*1e9,self.freq[i]<xmax*1e9)
-        self.xmin_list[i]=xmin*1e9
-        self.xmax_list[i]=xmax*1e9
+        self.xmin_list[index_crop]=xmin*1e9
+        self.xmax_list[index_crop]=xmax*1e9
         self.cond=cond
         freq_crop=self.freq[i][cond]
         amplitude_complex_crop=self.amplitude_complex[i][cond]
@@ -478,16 +481,16 @@ class Workspace(Windows):
             Qc_err=port1.fitresults['absQc_err']
             fr=port1.fitresults['fr']
             fr_err=port1.fitresults['fr_err']
-            self.Qi_fit_list[i]=Qi
-            self.Qc_fit_list[i]=Qc
-            self.fr_fit_list[i]=fr
-            self.Qi_err_fit_list[i]=Qi_err
-            self.Qc_err_fit_list[i]=Qc_err
-            self.fr_err_fit_list[i]=fr_err
+            self.Qi_fit_list[index_crop]=Qi
+            self.Qc_fit_list[index_crop]=Qc
+            self.fr_fit_list[index_crop]=fr
+            self.Qi_err_fit_list[index_crop]=Qi_err
+            self.Qc_err_fit_list[index_crop]=Qc_err
+            self.fr_err_fit_list[index_crop]=fr_err
         except:
             pass
         frmin=freq_crop[np.argmin(np.abs(amplitude_complex_crop))]
-        self.frmin_fit_list[i]=frmin
+        self.frmin_fit_list[index_crop]=frmin
         
         real_raw=self.amplitude_complex[i].real
         imag_raw=self.amplitude_complex[i].imag
@@ -503,18 +506,23 @@ class Workspace(Windows):
         axis[0].set_xlabel(xlabel_onepointfitwindow[0])
         axis[0].set_ylabel(ylabel_onepointfitwindow[0])
         axis[0].legend()
+        axis[0].grid(True)
 
         axis[1].plot(self.freq[i]/1e9,np.abs(self.amplitude_complex[i]),color='black',label='Data')
         axis[1].plot(freq_crop/1e9,np.abs(port1.z_data_sim),color='red',linestyle='dashed',label='Fit')
         axis[1].set_xlabel(xlabel_onepointfitwindow[1])
         axis[1].set_ylabel(ylabel_onepointfitwindow[1])
         axis[1].legend()
+        axis[1].grid(True)
 
         axis[2].plot(self.freq[i]/1e9,np.angle(self.amplitude_complex[i]),color='black',label='Data')
         axis[2].plot(freq_crop/1e9,np.angle(port1.z_data_sim),color='red',linestyle='dashed',label='Fit')
         axis[2].set_xlabel(xlabel_onepointfitwindow[2])
         axis[2].set_ylabel(ylabel_onepointfitwindow[2])
         axis[2].legend()
+        axis[2].grid(True)
+
+
         draw_canvas.draw()
         try:
             self.fitWindow.update_plot()
@@ -965,9 +973,9 @@ class fitWindow(tk.Toplevel):
             self.ax2.set_ylabel(ylabel_fitwindow[1])
             self.ax3.set_xlabel(xlabel_fitwindow[0])
             self.ax3.set_ylabel(ylabel_fitwindow[2])
-            self.ax1.grid()
-            self.ax2.grid()
-            self.ax3.grid()
+            self.ax1.grid(True)
+            self.ax2.grid(True)
+            self.ax3.grid(True)
             self.fig.tight_layout()
             self.fig.suptitle(suptitle_fitwindow[0], fontsize=16)
             self.canvas=FigureCanvasTkAgg(self.fig,self)
@@ -1067,25 +1075,28 @@ class OnePointFitWindow(tk.Toplevel):
         self.wm_title("Fit at "+cbarsweep[0]+" "+str(self.root.root.itvector[self.index,0]))
         self.fig.suptitle(suptitle_onepointfitwindow[0], fontsize=16)
         self.ax1.plot(self.real_raw,self.imag_raw,color='black',label='Raw')
-        self.ax1.plot(self.real_fit,self.imag_fit,color='red',label='Fit')
+        self.ax1.plot(self.real_fit,self.imag_fit,color='red',label='Fit',linestyle='--')
         self.ax1.set_xlabel(xlabel_onepointfitwindow[0])
         self.ax1.set_ylabel(ylabel_onepointfitwindow[0])
         self.ax1.legend()
+        self.ax1.grid(True)
 
         self.ax2.plot(x/1e9,np.abs(z),color='black',label='Raw')
-        self.ax2.plot(x[cond]/1e9,np.abs(self.port.z_data_sim),color='red',label='Fit')
+        self.ax2.plot(x[cond]/1e9,np.abs(self.port.z_data_sim),color='red',label='Fit',linestyle='--')
         self.ax2.set_xlabel(xlabel_onepointfitwindow[1])	
         self.ax2.set_ylabel(ylabel_onepointfitwindow[1])
         self.ax2.legend()
+        self.ax2.grid(True)
 
 
         self.ax3.plot(x,np.angle(z),color='black',label='Raw') 
-        self.ax3.plot(x[cond],np.angle(self.port.z_data_sim),color='red',label='Fit')
+        self.ax3.plot(x[cond],np.angle(self.port.z_data_sim),color='red',label='Fit',linestyle='--')
         self.ax3.set_xlabel(xlabel_onepointfitwindow[2])
         self.ax3.set_ylabel(ylabel_onepointfitwindow[2])
         self.ax3.legend()
+        self.ax3.grid(True)
+        
         self.fig.tight_layout()
-
         self.upperframe=tk.Frame(self,width=SIZE_X,height=SIZE_Y-150)
         self.upperframe.pack(side='top',fill='both',expand=True)
         self.canvas=FigureCanvasTkAgg(self.fig,self.upperframe)
@@ -1276,9 +1287,10 @@ class ButtonsAndEntries:
         self.canvas.root.master.fit()
     def onepointfit(self):
         axis=(self.canvas.root.master.ax1,self.canvas.root.master.ax2,self.canvas.root.master.ax3)
-        index=self.canvas.root.master.index_crop
+        index=self.canvas.root.master.index
+        index_crop=self.canvas.root.master.index_crop
         draw_canvas=self.canvas.root.master.canvas
-        self.canvas.root.master.port=self.canvas.root.master.master.master.onepointfit(index,axis,draw_canvas)
+        self.canvas.root.master.port=self.canvas.root.master.master.master.onepointfit(index,index_crop,axis,draw_canvas)
         self.canvas.root.master.parameterschart.update()
         
 class SweepFile(ButtonsAndEntries):
