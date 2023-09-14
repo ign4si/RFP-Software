@@ -129,7 +129,7 @@ class SeaofBTCapp(tk.Tk):
         # helpmenu.add_command(label="How to read real data files",command=lambda: self.read_pdf("tkinterstuff\RealDataFiles.pdf"))
         # helpmenu.add_command(label="How real data is fitted",command=lambda: self.read_pdf("tkinterstuff\RealDataFitted.pdf"))
         # helpmenu.add_separator()
-        helpmenu.add_command(label="Contact",command=lambda: tk.messagebox.showinfo(title="Contact",message="Beta 1.0.1\nMSc. I. Lobato \nlobato31415@gmail.com"))
+        helpmenu.add_command(label="Contact",command=lambda: tk.messagebox.showinfo(title="Contact",message="Beta 1.0.2\nMSc. I. Lobato \nlobato31415@gmail.com"))
         
         menubar.add_cascade(label="Help",menu=helpmenu)
         # telling the program: hey, this is the menu
@@ -489,8 +489,8 @@ class Workspace(Windows):
             self.fr_err_fit_list[index_crop]=fr_err
         except:
             pass
-        frmin=freq_crop[np.argmin(np.abs(amplitude_complex_crop))]
-        self.frmin_fit_list[index_crop]=frmin
+        self.frmin=freq_crop[np.argmin(np.abs(amplitude_complex_crop))]
+        self.frmin_fit_list[index_crop]=self.frmin
         
         real_raw=self.amplitude_complex[i].real
         imag_raw=self.amplitude_complex[i].imag
@@ -964,7 +964,7 @@ class fitWindow(tk.Toplevel):
         #create the figure
         if number_of_fits!=1:
             self.fig,(self.ax1,self.ax2,self.ax3)=matplotlib.pyplot.subplots(1,3,figsize=(15,5),dpi=100)
-            self.ax1.errorbar(self.root.itvector[sweep_list[0]:sweep_list[1]:sweep_list[2],0],np.array(self.root.fr_fit_list)/1e9,yerr=np.array(self.root.fr_err_fit_list)/1e9,fmt='o',color='black')
+            self.ax1.plot(self.root.itvector[sweep_list[0]:sweep_list[1]:sweep_list[2],0],np.array(self.root.frmin_fit_list)/1e9,'o',color='black')
             self.ax2.errorbar(self.root.itvector[sweep_list[0]:sweep_list[1]:sweep_list[2],0],self.root.Qi_fit_list,yerr=self.root.Qi_err_fit_list,fmt='o',color='black')
             self.ax3.errorbar(self.root.itvector[sweep_list[0]:sweep_list[1]:sweep_list[2],0],self.root.Qc_fit_list,yerr=self.root.Qc_err_fit_list,fmt='o',color='black')
             self.ax1.set_xlabel(xlabel_fitwindow[0])
@@ -1012,7 +1012,7 @@ class fitWindow(tk.Toplevel):
         self.ax1.clear()
         self.ax2.clear()
         self.ax3.clear()
-        self.ax1.errorbar(self.root.itvector[sweep_list[0]:sweep_list[1]:sweep_list[2],0],self.root.fr_fit_list,yerr=self.root.fr_err_fit_list,fmt='o',color='black')
+        self.ax1.plot(self.root.itvector[sweep_list[0]:sweep_list[1]:sweep_list[2],0],np.array(self.root.frmin_fit_list)/1e9,'o',color='black')
         self.ax2.errorbar(self.root.itvector[sweep_list[0]:sweep_list[1]:sweep_list[2],0],self.root.Qi_fit_list,yerr=self.root.Qi_err_fit_list,fmt='o',color='black')
         self.ax3.errorbar(self.root.itvector[sweep_list[0]:sweep_list[1]:sweep_list[2],0],self.root.Qc_fit_list,yerr=self.root.Qc_err_fit_list,fmt='o',color='black')
         self.ax1.set_xlabel(xlabel_fitwindow[0])
@@ -1066,6 +1066,7 @@ class OnePointFitWindow(tk.Toplevel):
         self.port=circuit.notch_port(x[cond],z[cond])
         self.port.autofit(guessdelay=guessdelay[0])
         self.fr_min=x[np.argmin(np.abs(z[cond]))]
+        self.root.root.frmin_fit_list[index_crop]=self.fr_min
         self.fig,(self.ax1,self.ax2,self.ax3)=matplotlib.pyplot.subplots(1,3,figsize=(15,5),dpi=100)
         
         self.real_raw=z.real
@@ -1291,6 +1292,7 @@ class ButtonsAndEntries:
         index_crop=self.canvas.root.master.index_crop
         draw_canvas=self.canvas.root.master.canvas
         self.canvas.root.master.port=self.canvas.root.master.master.master.onepointfit(index,index_crop,axis,draw_canvas)
+        self.canvas.root.master.fr_min=self.canvas.root.master.master.master.frmin
         self.canvas.root.master.parameterschart.update()
         
 class SweepFile(ButtonsAndEntries):
