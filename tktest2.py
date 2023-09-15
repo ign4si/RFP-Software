@@ -20,7 +20,6 @@ import os
 from scipy.optimize import fsolve
 from scipy.optimize import curve_fit
 from lmfit import minimize, Parameters, fit_report
-import fitz
 import sys
 
 
@@ -47,8 +46,7 @@ colormap_list=['Accent', 'Accent_r', 'Blues', 'Blues_r', 'BrBG', 'BrBG_r', 'BuGn
 cbarbool=[True]
 cbarsweep=["T"]
 guessdelay=[False]
-plotlabels=["$\mathrm{Frequency}$ $\mathrm{(GHz)}$","$\mathrm{S}_{21}$","$\mathrm{Frequency}$ $\mathrm{sweep}$","$\mathrm{T (K)}$"]
-grid_bool=[True]
+
 yplot=["S21"]
 yplot_list=["S21","S21dB","Phase"]
 xlabel_fitwindow=["$\mathrm{T}$ $\mathrm{(K)}$"]
@@ -60,6 +58,17 @@ suptitle_onepointfitwindow=["$\mathrm{Fit}$"]
 baseline_folder=[""]
 baseline_sweep=[0,0,0]
 smoothlist=[0]
+
+fontsize=[10,10,10,10,10]
+plotlabels=["$\mathrm{Frequency}$ $\mathrm{(GHz)}$","$\mathrm{S}_{21}$","$\mathrm{Frequency}$ $\mathrm{sweep}$","$\mathrm{T (K)}$"]
+grid_bool=[True]
+xticks=[None]
+yticks=[None]
+marker_size=[1]
+linewidth=[1]
+linestyle=["solid"]
+ticksin=[True]
+
 init_phi0= -50
 init_Qc = 0
 init_Qi = 0
@@ -91,7 +100,7 @@ class SeaofBTCapp(tk.Tk):
         tk.Tk.wm_title(self, "RFP")
         tk.Tk.wm_geometry(self, self.geometry())
         #change the background color
-
+        self.state('zoomed')
         self.container = tk.Frame(self)
         self.container.pack(side="top", fill="both", expand=True)
         self.container.grid_rowconfigure(0, weight=1)
@@ -129,7 +138,7 @@ class SeaofBTCapp(tk.Tk):
         # helpmenu.add_command(label="How to read real data files",command=lambda: self.read_pdf("tkinterstuff\RealDataFiles.pdf"))
         # helpmenu.add_command(label="How real data is fitted",command=lambda: self.read_pdf("tkinterstuff\RealDataFitted.pdf"))
         # helpmenu.add_separator()
-        helpmenu.add_command(label="Contact",command=lambda: tk.messagebox.showinfo(title="Contact",message="Beta 1.0.2\nMSc. I. Lobato \nlobato31415@gmail.com"))
+        helpmenu.add_command(label="Contact",command=lambda: tk.messagebox.showinfo(title="Contact",message="Beta 1.0.3\nMSc. I. Lobato \nlobato31415@gmail.com"))
         
         menubar.add_cascade(label="Help",menu=helpmenu)
         # telling the program: hey, this is the menu
@@ -289,7 +298,7 @@ class Workspace(Windows):
         self.controlcanvas.add_object(CbarSweep,x=xsep)
         self.controlcanvas.add_object(Fit,x=-xsep,y=ysep)
         self.controlcanvas.add_object(GuessDelay,x=xsep)
-        self.controlcanvas.add_object(PlotLabels,x=-xsep,y=ysep)
+        self.controlcanvas.add_object(PlotParameters,x=-xsep,y=ysep)
         self.controlcanvas.add_object(PlotY,x=xsep)
         self.controlcanvas.add_object(Baseline,x=-xsep,y=ysep)
         self.controlcanvas.add_object(BaselineSweep,x=xsep)
@@ -364,13 +373,24 @@ class Workspace(Windows):
         global colormap
         global xlabel
         global ylabel
-        global grid_bool
         global title
         global yplot
         global baseline_folder
         global baseline_sweep
+
+        global fontsize
+        global plotlabels
+        global grid_bool
+        global xticks
+        global yticks
+        global marker_size
+        global linewidth
+        global linestyle
+        global ticksin
+
         cmap=matplotlib.pyplot.get_cmap(colormap[0])
         #clean the plot
+
         self.a.clear()
         if yplot[0]=="S21":
             self.yplot=self.amplitude
@@ -435,9 +455,9 @@ class Workspace(Windows):
 
         for j in range(sweep_list[0],sweep_list[1],sweep_list[2]):
             if last_value==first_value:
-                self.a.plot(self.freq[j]/1e9, self.yplot[j]+shift[0]*j,color=cmap(j/sweep_list[1]))
+                self.a.plot(self.freq[j]/1e9, self.yplot[j]+shift[0]*j,color=cmap(j/sweep_list[1]),linewidth=linewidth[0],linestyle=linestyle[0],markersize=marker_size[0])
             else:
-                self.a.plot(self.freq[j]/1e9, self.yplot[j]+shift[0]*j,color=cmap((self.itvector[j][0]-first_value)/(last_value-first_value)))
+                self.a.plot(self.freq[j]/1e9, self.yplot[j]+shift[0]*j,color=cmap((self.itvector[j][0]-first_value)/(last_value-first_value)),linewidth=linewidth[0],linestyle=linestyle[0],markersize=marker_size[0])
         
         self.sm = matplotlib.pyplot.cm.ScalarMappable(cmap=cmap, norm=matplotlib.pyplot.Normalize(vmin=first_value, vmax=last_value))
         if cbarbool[0]:
@@ -448,14 +468,27 @@ class Workspace(Windows):
         else:
             self.cbar=None
         #put latex labels 
-        self.a.set_xlabel(plotlabels[0])
-        self.a.set_ylabel(plotlabels[1])
-        self.a.set_title(plotlabels[2])
+        self.a.set_xlabel(plotlabels[0],fontsize=fontsize[0])
+        self.a.set_ylabel(plotlabels[1],fontsize=fontsize[1])
+        self.a.set_title(plotlabels[2],fontsize=fontsize[2])
         #add plotlabels[3] as a label for the colorbar
         if self.cbar!=None:
-            self.cbar.ax.set_title(plotlabels[3])
+            self.cbar.ax.set_title(plotlabels[3],fontsize=fontsize[3])
         #put the grid
         self.a.grid(grid_bool[0])
+        if isinstance(xticks[0],type(None)):
+            pass
+        else:
+            self.a.set_xticks(xticks[0])
+        if isinstance(yticks[0],type(None)):
+            pass
+        else:
+            self.a.set_yticks(yticks[0])
+        self.a.tick_params(axis='both', labelsize=fontsize[4])        
+        if ticksin[0]:
+            self.a.tick_params(direction='in')
+        else:
+            self.a.tick_params(direction='out')
         self.canvas.draw()
         for i in self.informationchart_list:
             i.update()
@@ -590,6 +623,10 @@ class Workspace(Windows):
         #Open a new window
         self.fitWindow=fitWindow(self,number_of_fits)
         self.fitWindow.mainloop()
+
+    def customize_plot(self):
+        self.customizePlotWindow=plotWindow(self)
+        self.customizePlotWindow.mainloop()
 class Sonnet(Windows):
     def __init__(self, root,controller):
         global sonnet_file
@@ -947,6 +984,28 @@ class Sonnet(Windows):
         button7.on_clicked(fitandgo([fit,getpars,forward]))
         matplotlib.pyplot.show()
 
+class plotWindow(tk.Toplevel):
+    def __init__(self,root):
+        tk.Toplevel.__init__(self,root)
+        self.root=root
+        self.wm_title("Plot parameters")
+        self.geometry("1280x720")
+        self.configure(bg=HOMEPAGEBG)
+        self.controlcanvas=ControlCanvas(self)
+        xsep=500
+        ysep=200
+        self.controlcanvas.add_object(Fontsize) #all four sizes and the last one is the size of the ticks
+        self.controlcanvas.add_object(PlotLabels,x=xsep)
+        self.controlcanvas.add_object(GridBool,x=-xsep,y=ysep)
+        self.controlcanvas.add_object(XTicks,x=xsep)
+        self.controlcanvas.add_object(YTicks,x=-xsep,y=ysep)
+        self.controlcanvas.add_object(Linestyle,x=xsep)
+        self.controlcanvas.add_object(Linewidth,x=-xsep,y=ysep)
+        self.controlcanvas.add_object(TicksIn,x=xsep)
+        self.controlcanvas.pack(side='top',fill='both',expand=True,pady=10, padx=10)
+
+
+    
     
 class fitWindow(tk.Toplevel):
     def __init__(self,root,number_of_fits):
@@ -1222,6 +1281,8 @@ class ButtonsAndEntries:
         if self.type=="bool":
             for i in range(len(self.entry_list)):
                 self.globalparams_list[i]=bool(self.entry_list[i].get())
+        if self.type=="np.array":
+            self.globalparams_list[0]=np.linspace(float(self.entry_list[0].get()),float(self.entry_list[1].get()),int(self.entry_list[2].get()))
         if self.type=="radiobutton":
             self.globalparams_list[0]=self.v.get()
         if load_baseline==True:
@@ -1294,6 +1355,8 @@ class ButtonsAndEntries:
         self.canvas.root.master.port=self.canvas.root.master.master.master.onepointfit(index,index_crop,axis,draw_canvas)
         self.canvas.root.master.fr_min=self.canvas.root.master.master.master.frmin
         self.canvas.root.master.parameterschart.update()
+    def customize_plot(self):
+        self.canvas.root.master.customize_plot() 
         
 class SweepFile(ButtonsAndEntries):
     def __init__(self,canvas):
@@ -1503,6 +1566,39 @@ class GuessDelay(ButtonsAndEntries):
                                    window=self.entry_list[0])
         self.canvas.create_window(self.canvas.posx+160, self.canvas.posy+120,width=label_width,height=label_height,
                                    window=tk.Label(self.canvas.root, text="Guess delay",font=NORM_FONT))
+class PlotParameters(ButtonsAndEntries):
+    def __init__(self,canvas):
+        button_width=50
+        button_height=60
+        self.canvas=canvas
+        self.canvas.create_window(self.canvas.posx+160, self.canvas.posy+140,width=button_width,height=button_height,
+                                      window=tk.Button(self.canvas.root, text="Customize plot", command=lambda: self.customize_plot()))
+class Fontsize(ButtonsAndEntries):
+    def __init__(self,canvas):
+        global fontsize
+        #parameters for this button
+        self.type="float"
+        self.globalparams_list=fontsize
+        self.entry_list=[]
+        self.canvas=canvas
+        label_width=60
+        button_width=50
+        entry_width=50
+        label_height=20
+        button_height=60
+        entry_height=20
+
+        #create the buttons and the entries
+        for i in range(len(self.globalparams_list)):
+            self.entry_list.append(tk.Entry(self.canvas.root))
+            self.canvas.create_window(self.canvas.posx+160+i*40, self.canvas.posy+140,width=entry_width,height=entry_height,
+                                      window=self.entry_list[i])
+            self.entry_list[i].insert(0, self.globalparams_list[i])
+        #draw the submit button and the labels
+        self.canvas.create_window(self.canvas.posx+160+6*40, self.canvas.posy+140,width=button_width,height=button_height,
+                                      window=tk.Button(self.canvas.root, text="Submit", command=lambda: self.submit()))
+        self.canvas.create_window(self.canvas.posx+160, self.canvas.posy+120,width=label_width,height=label_height,
+                                      window=tk.Label(self.canvas.root, text="Fontsize",font=NORM_FONT))
 class PlotLabels(ButtonsAndEntries):
     def __init__(self,canvas):
         global plotlabels
@@ -1529,6 +1625,153 @@ class PlotLabels(ButtonsAndEntries):
                                       window=tk.Button(self.canvas.root, text="Submit", command=lambda: self.submit()))
         self.canvas.create_window(self.canvas.posx+160, self.canvas.posy+105,width=label_width,height=label_height,
                                       window=tk.Label(self.canvas.root, text="Labels",font=NORM_FONT))
+class GridBool(ButtonsAndEntries):
+    def __init__(self,canvas):
+        global grid_bool
+        #parameters for this button
+        self.type="bool"
+        self.globalparams_list=grid_bool
+        self.entry_list=[]
+        self.canvas=canvas
+        label_width=100
+        button_width=50
+        label_height=20
+        button_height=60
+
+        #create an on/off switch button
+        self.entry_list.append(tk.Button(self.canvas.root, text="On", command=lambda: self.switch()))
+        self.canvas.create_window(self.canvas.posx+160, self.canvas.posy+140,width=button_width,height=button_height,
+                                   window=self.entry_list[0])
+        self.canvas.create_window(self.canvas.posx+160, self.canvas.posy+120,width=label_width,height=label_height,
+                                   window=tk.Label(self.canvas.root, text="Grid",font=NORM_FONT))
+class XTicks(ButtonsAndEntries):
+    def __init__(self,canvas):
+        global xticks
+        #parameters for this button
+        self.type="np.array"
+        self.globalparams_list=xticks
+        self.entry_list=[]
+        self.canvas=canvas
+
+        label_width=70
+        button_width=50
+        entry_width=50
+        label_height=20
+        button_height=60
+        entry_height=20
+
+        #create the buttons and the entries
+        for i in range(3):
+            self.entry_list.append(tk.Entry(self.canvas.root))
+            self.canvas.create_window(self.canvas.posx+160+i*70, self.canvas.posy+140,width=entry_width,height=entry_height, window=self.entry_list[i])
+
+        #draw the submit button and the labels
+        self.canvas.create_window(self.canvas.posx+370, self.canvas.posy+140,width=button_width,height=button_height, window=tk.Button(self.canvas.root, text="Submit", command=lambda: self.submit()))
+        self.canvas.create_window(self.canvas.posx+160, self.canvas.posy+120,width=label_width,height=label_height, window=tk.Label(self.canvas.root, text="Initial",font=NORM_FONT))
+        self.canvas.create_window(self.canvas.posx+230, self.canvas.posy+120,width=label_width,height=label_height, window=tk.Label(self.canvas.root, text="End",font=NORM_FONT))
+        self.canvas.create_window(self.canvas.posx+300, self.canvas.posy+120,width=label_width,height=label_height, window=tk.Label(self.canvas.root, text="Interval number",font=NORM_FONT))
+class YTicks(ButtonsAndEntries):
+    def __init__(self,canvas):
+        global yticks
+        #parameters for this button
+        self.type="np.array"
+        self.globalparams_list=yticks
+        self.entry_list=[]
+        self.canvas=canvas
+
+        label_width=70
+        button_width=50
+        entry_width=50
+        label_height=20
+        button_height=60
+        entry_height=20
+
+        #create the buttons and the entries
+        for i in range(3):
+            self.entry_list.append(tk.Entry(self.canvas.root))
+            self.canvas.create_window(self.canvas.posx+160+i*70, self.canvas.posy+140,width=entry_width,height=entry_height, window=self.entry_list[i])
+
+        #draw the submit button and the labels
+        self.canvas.create_window(self.canvas.posx+370, self.canvas.posy+140,width=button_width,height=button_height, window=tk.Button(self.canvas.root, text="Submit", command=lambda: self.submit()))
+        self.canvas.create_window(self.canvas.posx+160, self.canvas.posy+120,width=label_width,height=label_height, window=tk.Label(self.canvas.root, text="Initial",font=NORM_FONT))
+        self.canvas.create_window(self.canvas.posx+230, self.canvas.posy+120,width=label_width,height=label_height, window=tk.Label(self.canvas.root, text="End",font=NORM_FONT))
+        self.canvas.create_window(self.canvas.posx+300, self.canvas.posy+120,width=label_width,height=label_height, window=tk.Label(self.canvas.root, text="Interval number",font=NORM_FONT))
+
+
+class Linestyle(ButtonsAndEntries):
+    def __init__(self,canvas):
+        global linestyle
+        #parameters for this button
+        self.type="str"
+        self.globalparams_list=linestyle
+        self.entry_list=[]
+        self.canvas=canvas
+
+        label_width=60
+        button_width=50
+        entry_width=50
+        label_height=20
+        button_height=60
+        entry_height=20
+        
+        #create the buttons and the entries
+        for i in range(len(self.globalparams_list)):
+            self.entry_list.append(tk.Entry(self.canvas.root))
+            self.entry_list[i].insert(0, self.globalparams_list[i])
+            self.canvas.create_window(self.canvas.posx+160+i*40, self.canvas.posy+140,width=entry_width,height=entry_height,window=self.entry_list[i])
+        
+        #draw the submit button and the labels
+        self.canvas.create_window(self.canvas.posx+240, self.canvas.posy+140,width=button_width,height=button_height,
+                                      window=tk.Button(self.canvas.root, text="Submit", command=lambda: self.submit()))
+        self.canvas.create_window(self.canvas.posx+160, self.canvas.posy+120,width=label_width,height=label_height,
+                                        window=tk.Label(self.canvas.root, text="Linestyle",font=NORM_FONT)) 
+
+class Linewidth(ButtonsAndEntries):
+    def __init__(self,canvas):
+        global linewidth
+        #parameters for this button
+        self.type="float"
+        self.globalparams_list=linewidth
+        self.entry_list=[]
+        self.canvas=canvas
+
+        label_width=60
+        button_width=50
+        entry_width=50
+        label_height=20
+        button_height=60
+        entry_height=20
+        
+        #create the buttons and the entries
+        for i in range(len(self.globalparams_list)):
+            self.entry_list.append(tk.Entry(self.canvas.root))
+            self.entry_list[i].insert(0, self.globalparams_list[i])
+            self.canvas.create_window(self.canvas.posx+160+i*40, self.canvas.posy+140,width=entry_width,height=entry_height,window=self.entry_list[i])
+        
+        #draw the submit button and the labels
+        self.canvas.create_window(self.canvas.posx+240, self.canvas.posy+140,width=button_width,height=button_height,
+                                      window=tk.Button(self.canvas.root, text="Submit", command=lambda: self.submit()))
+        self.canvas.create_window(self.canvas.posx+160, self.canvas.posy+120,width=label_width,height=label_height,
+                                        window=tk.Label(self.canvas.root, text="Linewidth",font=NORM_FONT))
+class TicksIn(ButtonsAndEntries):
+    def __init__(self,canvas):
+        global ticksin
+        #parameters for this button
+        self.type="bool"
+        self.globalparams_list=ticksin
+        self.entry_list=[]
+        self.canvas=canvas
+        label_width=100
+        button_width=50
+        label_height=20
+        button_height=60
+
+        #create an on/off switch button
+        self.entry_list.append(tk.Button(self.canvas.root, text="On", command=lambda: self.switch()))
+        self.canvas.create_window(self.canvas.posx+160, self.canvas.posy+140,width=button_width,height=button_height,
+                                   window=self.entry_list[0])
+        self.canvas.create_window(self.canvas.posx+160, self.canvas.posy+120,width=label_width,height=label_height,
+                                   window=tk.Label(self.canvas.root, text="Ticks in",font=NORM_FONT))
 class FitWindowLabelsX(ButtonsAndEntries):
     def __init__(self,canvas):
         global xlabel_fitwindow

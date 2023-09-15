@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import os
 import pandas as pd
 from resonator_tools import circuit
-labels=["temperature","power","bandwidth","x","y","z","freq","Re_S21","Im_S21","amplitude","phase"]
+labels=["temperature","power","bandwidth","Bx","By","Bz","freq","Re_S21","Im_S21","amplitude","phase"]
 
 class Data:
     def __init__(self,path,data_type=None,freq_column=None,verbose=False):
