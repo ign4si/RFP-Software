@@ -14,7 +14,7 @@ import numpy as np
 import pandas as pd
 from resonator_tools import circuit
 from matplotlib.widgets import Cursor, Slider, Button
-matplotlib.rcParams['text.usetex'] = True
+matplotlib.rcParams['text.usetex'] = True   #Change to false if u dont have latex <3
 import Sliders 
 import os
 from scipy.optimize import fsolve
@@ -41,6 +41,7 @@ sweep_list=[0,-1,1]
 file=[0]
 shift=[0]
 colormap=["coolwarm"]
+colorplotcolormap=["coolwarm"]
 colormap_list=['Accent', 'Accent_r', 'Blues', 'Blues_r', 'BrBG', 'BrBG_r', 'BuGn', 'BuGn_r', 'BuPu', 'BuPu_r', 'CMRmap', 'CMRmap_r', 'Dark2', 'Dark2_r', 'GnBu', 'GnBu_r', 'Greens', 'Greens_r', 'Greys', 'Greys_r', 'OrRd', 'OrRd_r', 'Oranges', 'Oranges_r', 'PRGn', 'PRGn_r', 'Paired', 'Paired_r', 'Pastel1', 'Pastel1_r', 'Pastel2', 'Pastel2_r', 'PiYG', 'PiYG_r', 'PuBu', 'PuBuGn', 'PuBuGn_r', 'PuBu_r', 'PuOr', 'PuOr_r', 'PuRd', 'PuRd_r', 'Purples', 'Purples_r', 'RdBu', 'RdBu_r', 'RdGy', 'RdGy_r', 'RdPu', 'RdPu_r', 'RdYlBu', 'RdYlBu_r', 'RdYlGn', 'RdYlGn_r', 'Reds', 'Reds_r', 'Set1', 'Set1_r', 'Set2', 'Set2_r', 'Set3', 'Set3_r', 'Spectral', 'Spectral_r', 'Wistia', 'Wistia_r', 'YlGn', 'YlGnBu', 'YlGnBu_r', 'YlGn_r', 'YlOrBr', 'YlOrBr_r', 'YlOrRd', 'YlOrRd_r', 'afmhot', 'afmhot_r', 'autumn', 'autumn_r', 'binary', 'binary_r', 'bone', 'bone_r', 'brg', 'brg_r', 'bwr', 'bwr_r', 'cividis', 'cividis_r', 'cool', 'cool_r', 'coolwarm', 'coolwarm_r', 'copper', 'copper_r', 'cubehelix', 'cubehelix_r', 'flag', 'flag_r', 'gist_earth', 'gist_earth_r', 'gist_gray', 'gist_gray_r', 'gist_heat', 'gist_heat_r', 'gist_ncar', 'gist_ncar_r', 'gist_rainbow', 'gist_rainbow_r', 'gist_stern', 'gist_stern_r', 'gist_yarg', 'gist_yarg_r', 'gnuplot', 'gnuplot2', 'gnuplot2_r', 'gnuplot_r', 'gray', 'gray_r', 'hot', 'hot_r', 'hsv', 'hsv_r', 'inferno', 'inferno_r', 'jet', 
 'jet_r', 'magma', 'magma_r', 'nipy_spectral', 'nipy_spectral_r', 'ocean', 'ocean_r', 'pink', 'pink_r', 'plasma', 'plasma_r', 'prism', 'prism_r', 'rainbow', 'rainbow_r', 'seismic', 'seismic_r', 'spring', 'spring_r', 'summer', 'summer_r', 'tab10', 'tab10_r', 'tab20', 'tab20_r', 'tab20b', 'tab20b_r', 'tab20c', 'tab20c_r', 'terrain', 'terrain_r', 'turbo', 'turbo_r', 'twilight', 'twilight_r', 'twilight_shifted', 'twilight_shifted_r', 'viridis', 'viridis_r', 'winter', 'winter_r']
 cbarbool=[True]
@@ -55,6 +56,8 @@ suptitle_fitwindow=["$\mathrm{Fitted}$ $\mathrm{parameters}$"]
 xlabel_onepointfitwindow=["$\mathrm{Re}\mathrm{(S}_{21}\mathrm{)}$","$\mathrm{Frequency}$ $\mathrm{(GHz)}$","$\mathrm{Frequency}$ $\mathrm{(GHz)}$"]
 ylabel_onepointfitwindow=["$\mathrm{Im}\mathrm{(S}_{21}\mathrm{)}$","$\mathrm{S}_{21}$","$\mathrm{Phase}$"]
 suptitle_onepointfitwindow=["$\mathrm{Fit}$"]
+colorplotfontsize=[10,10,10,10,10]
+colorplotlabels=["$\mathrm{Frequency}$ $\mathrm{(GHz)}$","$\mathrm{T} \mathrm{(K)}$","$\mathrm{Color} \mathrm{Plot}$","$\mathrm{S_{21}}$"]
 baseline_folder=[""]
 baseline_sweep=[0,0,0]
 smoothlist=[0]
@@ -138,7 +141,7 @@ class SeaofBTCapp(tk.Tk):
         # helpmenu.add_command(label="How to read real data files",command=lambda: self.read_pdf("tkinterstuff\RealDataFiles.pdf"))
         # helpmenu.add_command(label="How real data is fitted",command=lambda: self.read_pdf("tkinterstuff\RealDataFitted.pdf"))
         # helpmenu.add_separator()
-        helpmenu.add_command(label="Contact",command=lambda: tk.messagebox.showinfo(title="Contact",message="Beta 1.0.3\nMSc. I. Lobato \nlobato31415@gmail.com"))
+        helpmenu.add_command(label="Contact",command=lambda: tk.messagebox.showinfo(title="Contact",message="Beta 1.0.4\nMSc. I. Lobato \nlobato31415@gmail.com"))
         
         menubar.add_cascade(label="Help",menu=helpmenu)
         # telling the program: hey, this is the menu
@@ -303,6 +306,7 @@ class Workspace(Windows):
         self.controlcanvas.add_object(Baseline,x=-xsep,y=ysep)
         self.controlcanvas.add_object(BaselineSweep,x=xsep)
         self.controlcanvas.add_object(Smooth,x=-xsep,y=ysep)
+        self.controlcanvas.add_object(ColorPlotButton,x=xsep)
         self.controlcanvas.pack(side='top',fill='both',expand=True)
 
         
@@ -627,6 +631,9 @@ class Workspace(Windows):
     def customize_plot(self):
         self.customizePlotWindow=plotWindow(self)
         self.customizePlotWindow.mainloop()
+    def color_plot(self):
+        self.colorPlotWindow=ColorPlot(self)
+        self.colorPlotWindow.mainloop()
 class Sonnet(Windows):
     def __init__(self, root,controller):
         global sonnet_file
@@ -1003,9 +1010,76 @@ class plotWindow(tk.Toplevel):
         self.controlcanvas.add_object(Linewidth,x=-xsep,y=ysep)
         self.controlcanvas.add_object(TicksIn,x=xsep)
         self.controlcanvas.pack(side='top',fill='both',expand=True,pady=10, padx=10)
+class ColorPlot(tk.Toplevel):
+    def __init__(self,root):
+        global sweep_list
+        global colorplotlabels
+        global colorplotfontsize
+        global colorplotcolormap
+        cmap=matplotlib.pyplot.get_cmap(colorplotcolormap[0])
+        tk.Toplevel.__init__(self,root)
+        self.root=root
+        self.wm_title("Color plot")
+        self.geometry("1280x720")
+        self.configure(bg=HOMEPAGEBG)
+        self.title=tk.Label(self,text="Color Plot",font=LARGE_FONT,bg=HOMEPAGEBG,fg="white")
+        self.title.pack(side='top',fill='x',pady=10, padx=10)
+
+        self.x=self.root.freq[0]
+        self.y=self.root.itvector[sweep_list[0]:sweep_list[1]:sweep_list[2],0]
+        self.Z=self.root.yplot[sweep_list[0]:sweep_list[1]:sweep_list[2],:]
+        min_value=np.min(self.Z)
+        max_value=np.max(self.Z)
+        self.X,self.Y=np.meshgrid(self.x/1e9,self.y)
+        self.fig=matplotlib.pyplot.figure(figsize=(15,5),dpi=100)
+        self.ax=self.fig.add_subplot(111)
+        self.ax.pcolormesh(self.X,self.Y,self.Z,cmap=cmap)
+        self.ax.set_xlabel(colorplotlabels[0],fontsize=colorplotfontsize[0])
+        self.ax.set_ylabel(colorplotlabels[1],fontsize=colorplotfontsize[1])
+        self.ax.set_title(colorplotlabels[2],fontsize=colorplotfontsize[2])
+        self.fig.tight_layout()
+        self.sm = matplotlib.pyplot.cm.ScalarMappable(cmap=cmap, norm=matplotlib.pyplot.Normalize(vmin=min_value, vmax=max_value))
+        self.cbar=matplotlib.pyplot.colorbar(self.sm,ticks=np.round(np.linspace(min_value,max_value,7),3),cax=self.fig.add_axes([0.93, 0.15, 0.02, 0.7]))
+        self.cbar.ax.set_title(colorplotlabels[3],fontsize=colorplotfontsize[3])
+        self.ax.tick_params(axis='both', which='major', labelsize=colorplotfontsize[4])
+        self.canvas=FigureCanvasTkAgg(self.fig,self)
+        self.canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+        toolbar = NavigationToolbar2Tk(self.canvas, self)
+        toolbar.update()
+        self.canvas._tkcanvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+        self.canvas.draw()
+        xsep=350
+        self.controlcanvas=ControlCanvas(self)
+        self.controlcanvas.add_object(ColorPlotLabels)
+        self.controlcanvas.add_object(ColorPlotFontsize,x=xsep)
+        self.controlcanvas.add_object(ColorPlotColormap,x=xsep)
+        self.controlcanvas.pack(side='top',fill='x',pady=10, padx=10)
+    def update_plot(self):
+        global colorplotcolormap
+        global sweep_list
+        global colorplotlabels
+        global colorplotfontsize
 
 
-    
+        self.ax.clear()
+        self.cbar.remove()
+        self.y=self.root.itvector[sweep_list[0]:sweep_list[1]:sweep_list[2],0]
+        cmap=matplotlib.pyplot.get_cmap(colorplotcolormap[0])
+        self.Z=self.root.yplot
+        min_value=np.min(self.Z)
+        max_value=np.max(self.Z)
+        
+        self.X,self.Y=np.meshgrid(self.x/1e9,self.y)
+        self.ax.pcolormesh(self.X,self.Y,self.Z,cmap=matplotlib.pyplot.get_cmap(colorplotcolormap[0]))
+        self.ax.set_xlabel(colorplotlabels[0],fontsize=colorplotfontsize[0])
+        self.ax.set_ylabel(colorplotlabels[1],fontsize=colorplotfontsize[1])
+        self.ax.set_title(colorplotlabels[2],fontsize=colorplotfontsize[2])
+        self.sm = matplotlib.pyplot.cm.ScalarMappable(cmap=cmap, norm=matplotlib.pyplot.Normalize(vmin=min_value, vmax=max_value))
+        self.cbar=matplotlib.pyplot.colorbar(self.sm,ticks=np.round(np.linspace(min_value,max_value,5),3),cax=self.fig.add_axes([0.93, 0.15, 0.02, 0.7]))
+        self.cbar.ax.set_title(colorplotlabels[3],fontsize=colorplotfontsize[3])
+        self.ax.tick_params(axis='both', which='major', labelsize=colorplotfontsize[4])
+        self.canvas.draw()
+
     
 class fitWindow(tk.Toplevel):
     def __init__(self,root,number_of_fits):
@@ -1090,16 +1164,15 @@ class fitWindow(tk.Toplevel):
         #ask for a folder and a filename
         filename = tk.filedialog.asksaveasfilename(title="Select file",filetypes=(("txt files","*.txt"),("all files","*.*")))
         x=self.root.itvector[sweep_list[0]:sweep_list[1]:sweep_list[2],0]
-        y1=self.root.fr_fit_list
+        y1=self.root.frmin_fit_list
         y2=self.root.Qi_fit_list
         y3=self.root.Qc_fit_list
-        y1err=self.root.fr_err_fit_list
         y2err=self.root.Qi_err_fit_list
         y3err=self.root.Qc_err_fit_list
         with open(filename,'w') as o:
-            print("x\ty1\ty1err\ty2\ty2err\ty3\ty3err",file=o)
+            print("x\ty1\ty2\ty2err\ty3\ty3err",file=o)
             for i in range(len(x)):
-                print(str(x[i])+"\t"+str(y1[i])+"\t"+str(y1err[i])+"\t"+str(y2[i])+"\t"+str(y2err[i])+"\t"+str(y3[i])+"\t"+str(y3err[i]),file=o)
+                print(str(x[i])+"\t"+str(y1[i])+"\t"+str(y2[i])+"\t"+str(y2err[i])+"\t"+str(y3[i])+"\t"+str(y3err[i]),file=o)
 
 
     
@@ -1323,6 +1396,22 @@ class ButtonsAndEntries:
         if self.type=="radiobutton":
             self.globalparams_list[0]=self.v.get()
         self.onepointfit()
+    def submit_colorplot(self):
+        if self.type=="int":
+            for i in range(len(self.entry_list)):
+                self.globalparams_list[i]=int(self.entry_list[i].get())
+        if self.type=="float":
+            for i in range(len(self.entry_list)):
+                self.globalparams_list[i]=float(self.entry_list[i].get())
+        if self.type=="str":
+            for i in range(len(self.entry_list)):
+                self.globalparams_list[i]=str(self.entry_list[i].get())
+        if self.type=="bool":
+            for i in range(len(self.entry_list)):
+                self.globalparams_list[i]=bool(self.entry_list[i].get())
+        if self.type=="radiobutton":
+            self.globalparams_list[0]=self.v.get()
+        self.canvas.root.update_plot()
     def switch(self,plot=True):
         if self.globalparams_list[0]==True:
             self.globalparams_list[0]=False
@@ -1357,7 +1446,8 @@ class ButtonsAndEntries:
         self.canvas.root.master.parameterschart.update()
     def customize_plot(self):
         self.canvas.root.master.customize_plot() 
-        
+    def color_plot(self):
+        self.canvas.root.master.color_plot()
 class SweepFile(ButtonsAndEntries):
     def __init__(self,canvas):
         global file
@@ -1569,10 +1659,17 @@ class GuessDelay(ButtonsAndEntries):
 class PlotParameters(ButtonsAndEntries):
     def __init__(self,canvas):
         button_width=50
-        button_height=60
+        button_height=120
         self.canvas=canvas
         self.canvas.create_window(self.canvas.posx+160, self.canvas.posy+140,width=button_width,height=button_height,
                                       window=tk.Button(self.canvas.root, text="Customize plot", command=lambda: self.customize_plot()))
+class ColorPlotButton(ButtonsAndEntries):
+    def __init__(self,canvas):
+        button_width=50
+        button_height=120
+        self.canvas=canvas
+        self.canvas.create_window(self.canvas.posx+160, self.canvas.posy+140,width=button_width,height=button_height,
+                                      window=tk.Button(self.canvas.root, text="Color plot", command=lambda: self.color_plot()))
 class Fontsize(ButtonsAndEntries):
     def __init__(self,canvas):
         global fontsize
@@ -1597,6 +1694,32 @@ class Fontsize(ButtonsAndEntries):
         #draw the submit button and the labels
         self.canvas.create_window(self.canvas.posx+160+6*40, self.canvas.posy+140,width=button_width,height=button_height,
                                       window=tk.Button(self.canvas.root, text="Submit", command=lambda: self.submit()))
+        self.canvas.create_window(self.canvas.posx+160, self.canvas.posy+120,width=label_width,height=label_height,
+                                      window=tk.Label(self.canvas.root, text="Fontsize",font=NORM_FONT))
+class ColorPlotFontsize(ButtonsAndEntries):
+    def __init__(self,canvas):
+        global colorplotfontsize
+        #parameters for this button
+        self.type="float"
+        self.globalparams_list=colorplotfontsize
+        self.entry_list=[]
+        self.canvas=canvas
+        label_width=60
+        button_width=50
+        entry_width=50
+        label_height=20
+        button_height=60
+        entry_height=20
+
+        #create the buttons and the entries
+        for i in range(len(self.globalparams_list)):
+            self.entry_list.append(tk.Entry(self.canvas.root))
+            self.canvas.create_window(self.canvas.posx+160+i*40, self.canvas.posy+140,width=entry_width,height=entry_height,
+                                      window=self.entry_list[i])
+            self.entry_list[i].insert(0, self.globalparams_list[i])
+        #draw the submit button and the labels
+        self.canvas.create_window(self.canvas.posx+160+6*40, self.canvas.posy+140,width=button_width,height=button_height,
+                                      window=tk.Button(self.canvas.root, text="Submit", command=lambda: self.submit_colorplot()))
         self.canvas.create_window(self.canvas.posx+160, self.canvas.posy+120,width=label_width,height=label_height,
                                       window=tk.Label(self.canvas.root, text="Fontsize",font=NORM_FONT))
 class PlotLabels(ButtonsAndEntries):
@@ -1625,6 +1748,78 @@ class PlotLabels(ButtonsAndEntries):
                                       window=tk.Button(self.canvas.root, text="Submit", command=lambda: self.submit()))
         self.canvas.create_window(self.canvas.posx+160, self.canvas.posy+105,width=label_width,height=label_height,
                                       window=tk.Label(self.canvas.root, text="Labels",font=NORM_FONT))
+class ColorPlotLabels(ButtonsAndEntries):
+    def __init__(self,canvas):
+        global colorplotlabels
+        #parameters for this button
+        self.type="str"
+        self.globalparams_list=colorplotlabels
+        self.entry_list=[]
+        self.canvas=canvas
+        label_width=60
+        button_width=50
+        entry_width=180
+        label_height=20
+        button_height=60
+        entry_height=20
+
+        #create the buttons and the entries
+        for i in range(len(self.globalparams_list)):
+            self.entry_list.append(tk.Entry(self.canvas.root))
+            self.canvas.create_window(self.canvas.posx+160, self.canvas.posy+140+i*entry_height,width=entry_width,height=entry_height,
+                                        window=self.entry_list[i])
+            self.entry_list[i].insert(0, self.globalparams_list[i])
+        #draw the submit button and the labels
+        self.canvas.create_window(self.canvas.posx+140+entry_width, self.canvas.posy+170,width=button_width,height=button_height,
+                                        window=tk.Button(self.canvas.root, text="Submit", command=lambda: self.submit_colorplot()))
+        self.canvas.create_window(self.canvas.posx+160, self.canvas.posy+105,width=label_width,height=label_height,
+                                        window=tk.Label(self.canvas.root, text="Labels",font=NORM_FONT))
+class ColorPlotColormap(ButtonsAndEntries):
+    def __init__(self,canvas):
+        global colorplotcolormap
+        #parameters for this button
+        self.type="str"
+        self.globalparams_list=colorplotcolormap
+        self.entry_list=[]
+        self.canvas=canvas
+
+        label_width=60
+        button_width=50
+        entry_width=50
+        label_height=20
+        button_height=60
+        entry_height=20
+
+        #create the buttons and the entries
+        for i in range(len(self.globalparams_list)):
+            self.entry_list.append(tk.Entry(self.canvas.root))
+            self.canvas.create_window(self.canvas.posx+160+i*40, self.canvas.posy+140,width=entry_width,height=entry_height,window=self.entry_list[i])
+            self.entry_list[i].insert(0, self.globalparams_list[i])
+
+        #draw the submit button and the labels  
+        self.canvas.create_window(self.canvas.posx+320, self.canvas.posy+140,width=button_width,height=button_height,
+                                   window=tk.Button(self.canvas.root, text="Submit", command=lambda: self.submit_colorplot()))
+        self.canvas.create_window(self.canvas.posx+160, self.canvas.posy+120,width=label_width,height=label_height,
+                                   window=tk.Label(self.canvas.root, text="Colormap",font=NORM_FONT))
+
+        #next and previous color in colormap_list buttons
+        self.canvas.create_window(self.canvas.posx+220, self.canvas.posy+140,width=button_width,height=button_height,
+                                   window=tk.Button(self.canvas.root, text="<", command=lambda: self.previous()))
+        self.canvas.create_window(self.canvas.posx+270, self.canvas.posy+140,width=button_width,height=button_height,
+                                   window=tk.Button(self.canvas.root, text=">", command=lambda: self.next()))
+    def previous(self):
+        global colorplotcolormap
+        if colorplotcolormap[0] in colormap_list:
+            colorplotcolormap[0]=colormap_list[colormap_list.index(colorplotcolormap[0])-1]
+        self.entry_list[0].delete(0,tk.END)
+        self.entry_list[0].insert(0, colorplotcolormap[0])
+    def next(self):
+        global colorplotcolormap
+        if colorplotcolormap[0] in colormap_list:
+            colorplotcolormap[0]=colormap_list[colormap_list.index(colorplotcolormap[0])+1]
+        self.entry_list[0].delete(0,tk.END)
+        self.entry_list[0].insert(0, colorplotcolormap[0])
+
 class GridBool(ButtonsAndEntries):
     def __init__(self,canvas):
         global grid_bool
