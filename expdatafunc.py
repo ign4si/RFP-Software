@@ -4,7 +4,7 @@ import os
 import pandas as pd
 from resonator_tools import circuit
 labels=["temperature","power","bandwidth","Bx","By","Bz","freq","Re_S21","Im_S21","amplitude","phase"]
-
+labels_datacomp=["temperature","Ix","Iy","Ux","Uy","R","Bx","By","Bz","time"]
 class Data:
     def __init__(self,path,data_type=None,freq_column=None,verbose=False):
         if data_type==None:
@@ -25,6 +25,18 @@ class Data:
             self.number_of_files=number_of_files
             self.S21=[10**(i/20) for i in self.S21_DB]
             self.z=[self.S21[i]*np.exp(1j*self.phase[i]) for i in range(len(self.S21))]
+        if data_type=="Compensation":
+            Data=read_datacomp(path)
+            self.temp=Data[0]
+            self.ix=Data[1]
+            self.iy=Data[2]
+            self.ux=Data[3]
+            self.uy=Data[4]
+            self.r=Data[5]
+            self.bx=Data[6]
+            self.by=Data[7]
+            self.bz=Data[8]
+            self.time=Data[9]
         elif data_type=="temp-power-sweep":
             Data=TakeData(path)
             self.temp=Data[0]
@@ -71,6 +83,34 @@ class Data:
 
 
 
+def read_datacomp(filename):
+    global labels_datacomp
+    data = np.loadtxt(filename, skiprows=1)
+    with open(filename) as f:
+        header = f.readline().split()[1:]
+    index_list=[]
+    column_list=[]
+    #read labels
+    for i in range(len(labels_datacomp)):
+        try:
+            index_list.append(header.index(labels_datacomp[i]))
+            column_list.append(data[:,index_list[i]])
+        except:
+            index_list.append(None)
+            column_list.append(None)
+    #calculate the number of sweeps and points per sweep
+    try:
+        number_of_sweeps=len(np.where(np.diff(column_list[7])==0)[0]+1)+1
+        number_of_points_per_sweep=len(column_list[0])//number_of_sweeps
+    except:
+        number_of_sweeps=1
+        number_of_points_per_sweep=len(column_list[0])
+    #reshape the data
+    for i in range(len(labels_datacomp)):
+        if index_list[i]!=None:
+            column_list[i]=np.reshape(column_list[i],(number_of_sweeps,number_of_points_per_sweep))
+    return column_list
+    
 
 def ReadFiles(path,sort,verbose=False):
     dirs = os.listdir(path)

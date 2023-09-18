@@ -36,12 +36,15 @@ MENU_COLOR="#1B252F"
 
 folder="hola"
 sonnet_file="hola"
+compensation_file="hola"
+
 i=0
 sweep_list=[0,-1,1]
 file=[0]
 shift=[0]
 colormap=["coolwarm"]
 colorplotcolormap=["coolwarm"]
+compensationcolormap=["coolwarm"]
 colormap_list=['Accent', 'Accent_r', 'Blues', 'Blues_r', 'BrBG', 'BrBG_r', 'BuGn', 'BuGn_r', 'BuPu', 'BuPu_r', 'CMRmap', 'CMRmap_r', 'Dark2', 'Dark2_r', 'GnBu', 'GnBu_r', 'Greens', 'Greens_r', 'Greys', 'Greys_r', 'OrRd', 'OrRd_r', 'Oranges', 'Oranges_r', 'PRGn', 'PRGn_r', 'Paired', 'Paired_r', 'Pastel1', 'Pastel1_r', 'Pastel2', 'Pastel2_r', 'PiYG', 'PiYG_r', 'PuBu', 'PuBuGn', 'PuBuGn_r', 'PuBu_r', 'PuOr', 'PuOr_r', 'PuRd', 'PuRd_r', 'Purples', 'Purples_r', 'RdBu', 'RdBu_r', 'RdGy', 'RdGy_r', 'RdPu', 'RdPu_r', 'RdYlBu', 'RdYlBu_r', 'RdYlGn', 'RdYlGn_r', 'Reds', 'Reds_r', 'Set1', 'Set1_r', 'Set2', 'Set2_r', 'Set3', 'Set3_r', 'Spectral', 'Spectral_r', 'Wistia', 'Wistia_r', 'YlGn', 'YlGnBu', 'YlGnBu_r', 'YlGn_r', 'YlOrBr', 'YlOrBr_r', 'YlOrRd', 'YlOrRd_r', 'afmhot', 'afmhot_r', 'autumn', 'autumn_r', 'binary', 'binary_r', 'bone', 'bone_r', 'brg', 'brg_r', 'bwr', 'bwr_r', 'cividis', 'cividis_r', 'cool', 'cool_r', 'coolwarm', 'coolwarm_r', 'copper', 'copper_r', 'cubehelix', 'cubehelix_r', 'flag', 'flag_r', 'gist_earth', 'gist_earth_r', 'gist_gray', 'gist_gray_r', 'gist_heat', 'gist_heat_r', 'gist_ncar', 'gist_ncar_r', 'gist_rainbow', 'gist_rainbow_r', 'gist_stern', 'gist_stern_r', 'gist_yarg', 'gist_yarg_r', 'gnuplot', 'gnuplot2', 'gnuplot2_r', 'gnuplot_r', 'gray', 'gray_r', 'hot', 'hot_r', 'hsv', 'hsv_r', 'inferno', 'inferno_r', 'jet', 
 'jet_r', 'magma', 'magma_r', 'nipy_spectral', 'nipy_spectral_r', 'ocean', 'ocean_r', 'pink', 'pink_r', 'plasma', 'plasma_r', 'prism', 'prism_r', 'rainbow', 'rainbow_r', 'seismic', 'seismic_r', 'spring', 'spring_r', 'summer', 'summer_r', 'tab10', 'tab10_r', 'tab20', 'tab20_r', 'tab20b', 'tab20b_r', 'tab20c', 'tab20c_r', 'terrain', 'terrain_r', 'turbo', 'turbo_r', 'twilight', 'twilight_r', 'twilight_shifted', 'twilight_shifted_r', 'viridis', 'viridis_r', 'winter', 'winter_r']
 cbarbool=[True]
@@ -61,6 +64,8 @@ colorplotlabels=["$\mathrm{Frequency}$ $\mathrm{(GHz)}$","$\mathrm{T} \mathrm{(K
 baseline_folder=[""]
 baseline_sweep=[0,0,0]
 smoothlist=[0]
+window_size=[10]
+
 
 fontsize=[10,10,10,10,10]
 plotlabels=["$\mathrm{Frequency}$ $\mathrm{(GHz)}$","$\mathrm{S}_{21}$","$\mathrm{Frequency}$ $\mathrm{sweep}$","$\mathrm{T (K)}$"]
@@ -92,6 +97,16 @@ def smoothfunc(y, box_pts):
     box = np.ones(box_pts)/box_pts
     y_smooth = np.convolve(y, box, mode='same')
     return y_smooth
+
+def find_min(x,y,window_size=10):
+            min_index=np.argmin(y)
+            #make a second order polynomial fit around the minimum and find the minimum of the fit
+            x=x[min_index-window_size:min_index+window_size]
+            y=y[min_index-window_size:min_index+window_size]
+            fit=np.polyfit(x,y,2)
+            xmin=-fit[1]/(2*fit[0])
+            ymin=fit[0]*xmin**2+fit[1]*xmin+fit[2]
+            return xmin,ymin
 
 class SeaofBTCapp(tk.Tk):
 
@@ -141,7 +156,7 @@ class SeaofBTCapp(tk.Tk):
         # helpmenu.add_command(label="How to read real data files",command=lambda: self.read_pdf("tkinterstuff\RealDataFiles.pdf"))
         # helpmenu.add_command(label="How real data is fitted",command=lambda: self.read_pdf("tkinterstuff\RealDataFitted.pdf"))
         # helpmenu.add_separator()
-        helpmenu.add_command(label="Contact",command=lambda: tk.messagebox.showinfo(title="Contact",message="Beta 1.0.4\nMSc. I. Lobato \nlobato31415@gmail.com"))
+        helpmenu.add_command(label="Contact",command=lambda: tk.messagebox.showinfo(title="Contact",message="Beta 1.0.5\nMSc. I. Lobato \nlobato31415@gmail.com"))
         
         menubar.add_cascade(label="Help",menu=helpmenu)
         # telling the program: hey, this is the menu
@@ -225,6 +240,20 @@ class Windows(tk.Frame):
         frame.grid(row=0, column=0, sticky="nsew")
 
         controller.show_frame(Sonnet)
+    def select_compensation(self,controller):
+        global compensation_file
+
+        compensation_file = tk.filedialog.askopenfilename()
+
+        tk.messagebox.showinfo(
+            title='Selected File',
+            message=compensation_file
+        )
+        frame = Compensation(controller.container, controller)
+        controller.frames[Compensation] = frame
+        frame.grid(row=0, column=0, sticky="nsew")
+
+        controller.show_frame(Compensation)
 
 class StartPage(Windows):
 
@@ -243,9 +272,13 @@ class StartPage(Windows):
         button_style.configure('TButton', background = HOMEPAGEBG, foreground = 'white', width = 40,borderwidth=1, focusthickness=3, focuscolor='none',font=LARGE_FONT)
         button_sonnet=ttk.Button(self,text="Sonnet",style='TButton',command=lambda: self.select_sonnet_file(controller))
         button_sonnet.place(relx=0.5, rely=0.4, anchor=tk.N)
-        button = ttk.Button(self, text="Select a folder",style='TButton',
+        button = ttk.Button(self, text="RF Measurements",style='TButton',
                             command=lambda: self.select_folder(controller))
         button.place(relx=0.5, rely=0.5, anchor="n")
+
+        button_compensation=ttk.Button(self,text="DC Measurements",style='TButton',command=lambda: self.select_compensation(controller))
+        button_compensation.place(relx=0.5, rely=0.6, anchor=tk.N)
+
 
 
 class Workspace(Windows):
@@ -990,7 +1023,89 @@ class Sonnet(Windows):
         button6.on_clicked(backward)
         button7.on_clicked(fitandgo([fit,getpars,forward]))
         matplotlib.pyplot.show()
+class Compensation(Windows):
+    def __init__(self,parent,controller):
+        tk.Frame.__init__(self,parent)
+        self.controller=controller
+        self.parent=parent
+        self.title=tk.Label(self,text="Compensation",font=LARGE_FONT,bg=HOMEPAGEBG,fg="white")
+        self.title.pack(side='top',fill='x',pady=10, padx=10)
 
+        self.load_data()
+        self.find_min()
+        self.leftframe=tk.Frame(self,bg=HOMEPAGEBG)
+        self.leftframe.pack(side='left',fill='y',expand=True)
+        self.rightframe=tk.Frame(self,bg=HOMEPAGEBG)
+        self.rightframe.pack(side='left',fill='y',expand=True)
+        self.fig_main,self.ax_main=self.plot()
+        self.fig_fit,self.ax_fit=self.plotfit()
+        self.canvas_main=FigureCanvasTkAgg(self.fig_main,self.leftframe)
+        self.canvas_main.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+        self.canvas_fit=FigureCanvasTkAgg(self.fig_fit,self.rightframe)
+        self.canvas_fit.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+        self.toolbar_main = NavigationToolbar2Tk(self.canvas_main, self.leftframe)
+        self.toolbar_main.update()
+        self.canvas_main._tkcanvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+        self.toolbar_fit = NavigationToolbar2Tk(self.canvas_fit, self.rightframe)
+        self.toolbar_fit.update()
+        self.canvas_fit._tkcanvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+
+
+    def load_data(self):
+        global compensation_file
+        Data=edf.Data(compensation_file,data_type="Compensation")
+        self.temp=Data.temp
+        self.ix=Data.ix
+        self.iy=Data.iy
+        self.ux=Data.ux
+        self.uy=Data.uy
+        self.r=Data.r
+        self.bx=Data.bx
+        self.by=Data.by
+        self.bz=Data.bz
+        self.time=Data.time
+        self.xmin_list=[]
+        self.ymin_list=[]
+        if isinstance(self.bx,type(None)):
+            self.bfield=self.bz
+        else:
+            self.bfield=self.bx
+
+    def find_min(self):
+        global window_size
+        for i in range(0,len(self.by),2):
+                xmin_fs,ymin_fs=find_min(self.by[i,:],self.r[i,:],window_size=window_size[0])
+                xmin_bs,ymin_bs=find_min(self.by[i+1,:],self.r[i+1,:],window_size=window_size[0])
+                self.xmin_list.append((xmin_fs+xmin_bs)/2)
+                self.ymin_list.append((ymin_fs+ymin_bs)/2)
+    def plot(self):
+        global compensationcolormap
+        fig,ax=matplotlib.pyplot.subplots(figsize=(15,5),dpi=100)
+        cmap=matplotlib.pyplot.get_cmap(compensationcolormap[0])
+        for i in range(len(self.by)):
+            ax.plot(self.by[i,:],self.r[i,:] ,color=cmap(i/len(self.by)))
+            if i%2==0:
+                ax.plot(self.xmin_list[i//2],self.ymin_list[i//2],"o",color=cmap(i/len(self.by)))
+        ax.set_xlabel("$\mathrm{B_y} \mathrm{(T)}$")
+        ax.set_ylabel("$\mathrm{R} (\Omega)$")
+        ax.set_title("$\mathrm{Compensation}$")
+        return fig,ax
+
+    def plotfit(self):
+        fig,ax=matplotlib.pyplot.subplots(figsize=(15,5),dpi=100)
+        fig.subplots_adjust(left=0.2)
+        xplot=self.bfield[::2,0]
+        yplot=self.xmin_list
+        ax.plot(xplot,yplot,'-o',label="Data")
+        fit=np.polyfit(xplot,yplot,1)
+        ax.plot(xplot,fit[0]*xplot+fit[1],"--",label="Fit. \nSlope="+str(fit[0])+"\nIntercept="+str(fit[1])+r" $\mathrm{T}$")
+        if isinstance(self.bx,type(None)):
+            ax.set_xlabel("$\mathrm{B_z} \mathrm{(T)}$")
+        else:
+            ax.set_xlabel("$\mathrm{B_x} \mathrm{(T)}$")
+        ax.set_ylabel("$\mathrm{B_y} \mathrm{(T)}$")
+        ax.legend()
+        return fig,ax
 class plotWindow(tk.Toplevel):
     def __init__(self,root):
         tk.Toplevel.__init__(self,root)
@@ -1054,6 +1169,20 @@ class ColorPlot(tk.Toplevel):
         self.controlcanvas.add_object(ColorPlotFontsize,x=xsep)
         self.controlcanvas.add_object(ColorPlotColormap,x=xsep)
         self.controlcanvas.pack(side='top',fill='x',pady=10, padx=10)
+
+        cursor=Cursor(self.ax, useblit=True,horizOn=True,vertOn=True,color='red', linewidth=2)
+        def onclick(event):
+            if self.ax.get_navigate_mode() is not None and self.ax.get_navigate_mode() != '': 
+                return None
+            else:
+                if event.inaxes!=self.ax:
+                    return None
+                xevent=event.xdata
+        
+                index=np.argmin(np.abs(self.x/1e9-xevent))
+                CutWindow(self,index)
+
+        self.fig.canvas.mpl_connect('button_press_event', onclick)
     def update_plot(self):
         global colorplotcolormap
         global sweep_list
@@ -1275,6 +1404,26 @@ class OnePointFitWindow(tk.Toplevel):
         filename=tk.filedialog.asksaveasfilename(title="Select file",filetypes=(("txt files","*.txt"),("all files","*.*")))
         df=self.parameterschart.df
         df.to_csv(filename,sep='\t',index=False)
+class CutWindow(tk.Toplevel):
+    def __init__(self,root,index):
+        self.root=root
+        self.index=index
+        tk.Toplevel.__init__(self,root)
+        self.x=self.root.y
+        fixed_freq=self.root.x[index]
+        self.y=self.root.Z[:,index]
+        self.fig,ax=matplotlib.pyplot.subplots(figsize=(15,5),dpi=100)
+        ax.plot(self.x,self.y,'-o')
+        ax.set_xlabel(self.root.ax.get_ylabel())
+        ax.set_ylabel(self.root.cbar.ax.get_title())
+        ax.set_title("$\mathrm{Frequency}$"+"="+str(fixed_freq/1e9)+"$\mathrm{GHz}$")
+        self.canvas=FigureCanvasTkAgg(self.fig,self)
+        self.canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+        toolbar = NavigationToolbar2Tk(self.canvas, self)
+        toolbar.update()
+        self.canvas._tkcanvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+        self.canvas.draw()
+
 
 class InformationWindow(tk.Toplevel):
     def __init__(self,root,file):
