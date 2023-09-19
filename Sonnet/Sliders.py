@@ -1,15 +1,4 @@
 import numpy as np
-import matplotlib.pyplot as plt
-import scipy.special
-import math
-import os
-import cmath
-import csv
-import time
-from scipy.optimize import fsolve
-from scipy.optimize import curve_fit
-from matplotlib.widgets import Slider, Button
-from lmfit import minimize, Parameters, fit_report
 
 def read_data_2(name): #This is a new version for reading data. When the data is exported out directly from Sonnet.
 

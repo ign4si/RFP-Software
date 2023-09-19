@@ -1,9 +1,9 @@
 import tkinter as tk
-
+import tkinter.filedialog
 
 class Windows(tk.Frame):
     def __init__(self, parent,controller):
-        super().__init__(self, parent)
+        super().__init__(parent)
         self.controller = controller
         
     def select_folder(self):

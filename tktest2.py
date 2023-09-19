@@ -13,7 +13,7 @@ matplotlib.use("TkAgg")
 import numpy as np
 import pandas as pd
 from resonator_tools import circuit
-from matplotlib.widgets import Cursor, Slider, Button
+
 matplotlib.rcParams['text.usetex'] = True   #Change to false if u dont have latex <3
 import Sonnet.Sliders as Sliders 
 import os
