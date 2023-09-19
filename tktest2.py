@@ -1805,15 +1805,15 @@ class GuessDelay(ButtonsAndEntries):
                                    window=tk.Label(self.canvas.root, text="Guess delay",font=NORM_FONT))
 class PlotParameters(ButtonsAndEntries):
     def __init__(self,canvas):
-        button_width=50
-        button_height=120
+        button_width=120
+        button_height=60
         self.canvas=canvas
         self.canvas.create_window(self.canvas.posx+160, self.canvas.posy+140,width=button_width,height=button_height,
                                       window=tk.Button(self.canvas.root, text="Customize plot", command=lambda: self.customize_plot()))
 class ColorPlotButton(ButtonsAndEntries):
     def __init__(self,canvas):
-        button_width=50
-        button_height=120
+        button_width=120
+        button_height=60
         self.canvas=canvas
         self.canvas.create_window(self.canvas.posx+160, self.canvas.posy+140,width=button_width,height=button_height,
                                       window=tk.Button(self.canvas.root, text="Color plot", command=lambda: self.color_plot()))
