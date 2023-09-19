@@ -108,21 +108,18 @@ def find_min(x,y,window_size=10):
             ymin=fit[0]*xmin**2+fit[1]*xmin+fit[2]
             return xmin,ymin
 
-class SeaofBTCapp(tk.Tk):
+class MainContainer(tk.Tk):
 
     def __init__(self, *args, **kwargs):
-        global application_path
         tk.Tk.__init__(self, *args, **kwargs)
-
         tk.Tk.iconbitmap(self, default="tkinterstuff\logo.ico")
         tk.Tk.wm_title(self, "RFP")
         tk.Tk.wm_geometry(self, self.geometry())
-        #change the background color
         self.state('zoomed')
+
+
         self.container = tk.Frame(self)
         self.container.pack(side="top", fill="both", expand=True)
-        self.container.grid_rowconfigure(0, weight=1)
-        self.container.grid_columnconfigure(0, weight=1)
         style = ttk.Style(self)
         style.configure('TLabel', background='black', foreground='white')
         style.configure('TFrame', background='black')
@@ -161,10 +158,6 @@ class SeaofBTCapp(tk.Tk):
         menubar.add_cascade(label="Help",menu=helpmenu)
         # telling the program: hey, this is the menu
         tk.Tk.config(self, menu=menubar)
-
-        #make it fullscreen
-        self.winfo_screenwidth()
-        self.winfo_screenheight()
         
         
 
@@ -361,8 +354,6 @@ class Workspace(Windows):
         self.power=self.Data.power[file[0]]
         self.bandwidth=self.Data.bandwidth[file[0]]
         self.freq=self.Data.freq[file[0]]
-        self.real=self.Data.real[file[0]]
-        self.imag=self.Data.imag[file[0]]
         self.bx=self.Data.bx[file[0]]
         self.by=self.Data.by[file[0]]
         self.bz=self.Data.bz[file[0]]
@@ -391,16 +382,12 @@ class Workspace(Windows):
         self.phase=np.array([self.phase[i]-self.Baseline_phase for i in range(len(self.phase))])
         self.amplitude=np.power(10,self.amplitude_DB/20)
         self.amplitude_complex=self.amplitude*np.exp(1j*self.phase)
-        self.real=self.amplitude_complex.real
-        self.imag=self.amplitude_complex.imag
     def smooth_data(self):
         global smoothlist
         self.amplitude_DB=np.array([smoothfunc(self.amplitude_DB[i],smoothlist[0]) for i in range(len(self.amplitude_DB))])
         self.phase=np.array([smoothfunc(self.phase[i],smoothlist[0]) for i in range(len(self.phase))])
         self.amplitude=np.power(10,self.amplitude_DB/20)
         self.amplitude_complex=self.amplitude*np.exp(1j*self.phase)
-        self.real=self.amplitude_complex.real
-        self.imag=self.amplitude_complex.imag
 
     def plot(self):
         global folder
@@ -1056,15 +1043,10 @@ class Compensation(Windows):
         global compensation_file
         Data=edf.Data(compensation_file,data_type="Compensation")
         self.temp=Data.temp
-        self.ix=Data.ix
-        self.iy=Data.iy
-        self.ux=Data.ux
-        self.uy=Data.uy
         self.r=Data.r
         self.bx=Data.bx
         self.by=Data.by
         self.bz=Data.bz
-        self.time=Data.time
         self.xmin_list=[]
         self.ymin_list=[]
         if isinstance(self.bx,type(None)):
@@ -2511,5 +2493,5 @@ class InformationChart(tk.Canvas):
     def say(self):
         print(self.Df.df)
 
-app = SeaofBTCapp()
+app = MainContainer()
 app.mainloop()
