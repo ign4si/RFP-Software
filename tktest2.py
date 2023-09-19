@@ -59,7 +59,7 @@ suptitle_fitwindow=["$\mathrm{Fitted}$ $\mathrm{parameters}$"]
 xlabel_onepointfitwindow=["$\mathrm{Re}\mathrm{(S}_{21}\mathrm{)}$","$\mathrm{Frequency}$ $\mathrm{(GHz)}$","$\mathrm{Frequency}$ $\mathrm{(GHz)}$"]
 ylabel_onepointfitwindow=["$\mathrm{Im}\mathrm{(S}_{21}\mathrm{)}$","$\mathrm{S}_{21}$","$\mathrm{Phase}$"]
 suptitle_onepointfitwindow=["$\mathrm{Fit}$"]
-colorplotfontsize=[10,10,10,10,10]
+colorplotfontsize=[15,15,15,15,15]
 colorplotlabels=["$\mathrm{Frequency}$ $\mathrm{(GHz)}$","$\mathrm{T} \mathrm{(K)}$","$\mathrm{Color} \mathrm{Plot}$","$\mathrm{S_{21}}$"]
 baseline_folder=[""]
 baseline_sweep=[0,0,0]
@@ -67,7 +67,7 @@ smoothlist=[0]
 window_size=[10]
 
 
-fontsize=[10,10,10,10,10]
+fontsize=[15,15,15,15,15]
 plotlabels=["$\mathrm{Frequency}$ $\mathrm{(GHz)}$","$\mathrm{S}_{21}$","$\mathrm{Frequency}$ $\mathrm{sweep}$","$\mathrm{T (K)}$"]
 grid_bool=[True]
 xticks=[None]
@@ -511,6 +511,7 @@ class Workspace(Windows):
         #add plotlabels[3] as a label for the colorbar
         if self.cbar!=None:
             self.cbar.ax.set_title(plotlabels[3],fontsize=fontsize[3])
+            self.cbar.ax.tick_params(labelsize=colorplotfontsize[4])
         #put the grid
         self.a.grid(grid_bool[0])
         if isinstance(xticks[0],type(None)):
@@ -1148,17 +1149,16 @@ class ColorPlot(tk.Toplevel):
         self.X,self.Y=np.meshgrid(self.x/1e9,self.y)
         self.fig=matplotlib.pyplot.figure(figsize=(15,5),dpi=100)
         self.ax=self.fig.add_subplot(111)
-        self.ax.pcolormesh(self.X,self.Y,self.Z,cmap=cmap)
+        self.imagen=self.ax.pcolormesh(self.X,self.Y,self.Z,cmap=cmap)
         self.ax.set_xlabel(colorplotlabels[0],fontsize=colorplotfontsize[0])
         self.ax.set_ylabel(colorplotlabels[1],fontsize=colorplotfontsize[1])
         self.ax.set_title(colorplotlabels[2],fontsize=colorplotfontsize[2])
-        self.fig.tight_layout()
-        self.sm = matplotlib.pyplot.cm.ScalarMappable(cmap=cmap, norm=matplotlib.pyplot.Normalize(vmin=min_value, vmax=max_value))
-        self.cbar=matplotlib.pyplot.colorbar(self.sm,ticks=np.round(np.linspace(min_value,max_value,7),3),cax=self.fig.add_axes([0.93, 0.15, 0.02, 0.7]))
+        self.cbar=matplotlib.pyplot.colorbar(self.imagen,ax=self.ax)
         self.cbar.ax.set_title(colorplotlabels[3],fontsize=colorplotfontsize[3])
+        self.cbar.ax.tick_params(labelsize=colorplotfontsize[4])
         self.ax.tick_params(axis='both', which='major', labelsize=colorplotfontsize[4])
         self.canvas=FigureCanvasTkAgg(self.fig,self)
-        self.canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+        self.canvas.get_tk_widget().pack(side=tk.TOP, expand=True)
         toolbar = NavigationToolbar2Tk(self.canvas, self)
         toolbar.update()
         self.canvas._tkcanvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
@@ -1191,7 +1191,6 @@ class ColorPlot(tk.Toplevel):
 
 
         self.ax.clear()
-        self.cbar.remove()
         self.y=self.root.itvector[sweep_list[0]:sweep_list[1]:sweep_list[2],0]
         cmap=matplotlib.pyplot.get_cmap(colorplotcolormap[0])
         self.Z=self.root.yplot
@@ -1199,13 +1198,12 @@ class ColorPlot(tk.Toplevel):
         max_value=np.max(self.Z)
         
         self.X,self.Y=np.meshgrid(self.x/1e9,self.y)
-        self.ax.pcolormesh(self.X,self.Y,self.Z,cmap=matplotlib.pyplot.get_cmap(colorplotcolormap[0]))
+        self.imagen=self.ax.pcolormesh(self.X,self.Y,self.Z,cmap=matplotlib.pyplot.get_cmap(colorplotcolormap[0]))
         self.ax.set_xlabel(colorplotlabels[0],fontsize=colorplotfontsize[0])
         self.ax.set_ylabel(colorplotlabels[1],fontsize=colorplotfontsize[1])
         self.ax.set_title(colorplotlabels[2],fontsize=colorplotfontsize[2])
-        self.sm = matplotlib.pyplot.cm.ScalarMappable(cmap=cmap, norm=matplotlib.pyplot.Normalize(vmin=min_value, vmax=max_value))
-        self.cbar=matplotlib.pyplot.colorbar(self.sm,ticks=np.round(np.linspace(min_value,max_value,5),3),cax=self.fig.add_axes([0.93, 0.15, 0.02, 0.7]))
         self.cbar.ax.set_title(colorplotlabels[3],fontsize=colorplotfontsize[3])
+        self.cbar.ax.tick_params(labelsize=colorplotfontsize[4])
         self.ax.tick_params(axis='both', which='major', labelsize=colorplotfontsize[4])
         self.canvas.draw()
 
