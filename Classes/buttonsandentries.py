@@ -7,77 +7,77 @@ SMALL_FONT = ("CMU Serif", 6)
 class ButtonsAndEntries:
     def __init__(self,controller):
         self.controller=controller
-    def submit(self,plot=True,load_baseline=False):
-        if self.type=="int":
-            for i in range(len(self.entry_list)):
-                self.globalparams_list[i]=int(self.entry_list[i].get())
-        if self.type=="float":
-            for i in range(len(self.entry_list)):
-                self.globalparams_list[i]=float(self.entry_list[i].get())
-        if self.type=="str":
-            for i in range(len(self.entry_list)):
-                self.globalparams_list[i]=str(self.entry_list[i].get())
-        if self.type=="bool":
-            for i in range(len(self.entry_list)):
-                self.globalparams_list[i]=bool(self.entry_list[i].get())
-        if self.type=="np.array":
-            self.globalparams_list[0]=np.linspace(float(self.entry_list[0].get()),float(self.entry_list[1].get()),int(self.entry_list[2].get()))
-        if self.type=="radiobutton":
-            self.globalparams_list[0]=self.v.get()
-        if load_baseline==True:
-            self.canvas.root.master.load_data(reset=False)
-            self.canvas.root.master.load_baseline()
-            self.canvas.root.master.smooth_data()
-        if plot==True:
-            self.canvas.root.master.plot()
-    def submit_fitwindow(self):
-        if self.type=="int":
-            for i in range(len(self.entry_list)):
-                self.globalparams_list[i]=int(self.entry_list[i].get())
-        if self.type=="float":
-            for i in range(len(self.entry_list)):
-                self.globalparams_list[i]=float(self.entry_list[i].get())
-        if self.type=="str":
-            for i in range(len(self.entry_list)):
-                self.globalparams_list[i]=str(self.entry_list[i].get())
-        if self.type=="bool":
-            for i in range(len(self.entry_list)):
-                self.globalparams_list[i]=bool(self.entry_list[i].get())
-        if self.type=="radiobutton":
-            self.globalparams_list[0]=self.v.get()
-        self.canvas.root.update_plot()
-    def submit_onepointfitwindow(self):
-        if self.type=="int":
-            for i in range(len(self.entry_list)):
-                self.globalparams_list[i]=int(self.entry_list[i].get())
-        if self.type=="float":
-            for i in range(len(self.entry_list)):
-                self.globalparams_list[i]=float(self.entry_list[i].get())
-        if self.type=="str":
-            for i in range(len(self.entry_list)):
-                self.globalparams_list[i]=str(self.entry_list[i].get())
-        if self.type=="bool":
-            for i in range(len(self.entry_list)):
-                self.globalparams_list[i]=bool(self.entry_list[i].get())
-        if self.type=="radiobutton":
-            self.globalparams_list[0]=self.v.get()
-        self.onepointfit()
-    def submit_colorplot(self):
-        if self.type=="int":
-            for i in range(len(self.entry_list)):
-                self.globalparams_list[i]=int(self.entry_list[i].get())
-        if self.type=="float":
-            for i in range(len(self.entry_list)):
-                self.globalparams_list[i]=float(self.entry_list[i].get())
-        if self.type=="str":
-            for i in range(len(self.entry_list)):
-                self.globalparams_list[i]=str(self.entry_list[i].get())
-        if self.type=="bool":
-            for i in range(len(self.entry_list)):
-                self.globalparams_list[i]=bool(self.entry_list[i].get())
-        if self.type=="radiobutton":
-            self.globalparams_list[0]=self.v.get()
-        self.canvas.root.update_plot()
+    # def submit(self,plot=True,load_baseline=False):
+    #     if self.type=="int":
+    #         for i in range(len(self.entry_list)):
+    #             self.globalparams_list[i]=int(self.entry_list[i].get())
+    #     if self.type=="float":
+    #         for i in range(len(self.entry_list)):
+    #             self.globalparams_list[i]=float(self.entry_list[i].get())
+    #     if self.type=="str":
+    #         for i in range(len(self.entry_list)):
+    #             self.globalparams_list[i]=str(self.entry_list[i].get())
+    #     if self.type=="bool":
+    #         for i in range(len(self.entry_list)):
+    #             self.globalparams_list[i]=bool(self.entry_list[i].get())
+    #     if self.type=="np.array":
+    #         self.globalparams_list[0]=np.linspace(float(self.entry_list[0].get()),float(self.entry_list[1].get()),int(self.entry_list[2].get()))
+    #     if self.type=="radiobutton":
+    #         self.globalparams_list[0]=self.v.get()
+    #     if load_baseline==True:
+    #         self.canvas.root.master.load_data(reset=False)
+    #         self.canvas.root.master.load_baseline()
+    #         self.canvas.root.master.smooth_data()
+    #     if plot==True:
+    #         self.canvas.root.master.plot()
+    # def submit_fitwindow(self):
+    #     if self.type=="int":
+    #         for i in range(len(self.entry_list)):
+    #             self.globalparams_list[i]=int(self.entry_list[i].get())
+    #     if self.type=="float":
+    #         for i in range(len(self.entry_list)):
+    #             self.globalparams_list[i]=float(self.entry_list[i].get())
+    #     if self.type=="str":
+    #         for i in range(len(self.entry_list)):
+    #             self.globalparams_list[i]=str(self.entry_list[i].get())
+    #     if self.type=="bool":
+    #         for i in range(len(self.entry_list)):
+    #             self.globalparams_list[i]=bool(self.entry_list[i].get())
+    #     if self.type=="radiobutton":
+    #         self.globalparams_list[0]=self.v.get()
+    #     self.canvas.root.update_plot()
+    # def submit_onepointfitwindow(self):
+    #     if self.type=="int":
+    #         for i in range(len(self.entry_list)):
+    #             self.globalparams_list[i]=int(self.entry_list[i].get())
+    #     if self.type=="float":
+    #         for i in range(len(self.entry_list)):
+    #             self.globalparams_list[i]=float(self.entry_list[i].get())
+    #     if self.type=="str":
+    #         for i in range(len(self.entry_list)):
+    #             self.globalparams_list[i]=str(self.entry_list[i].get())
+    #     if self.type=="bool":
+    #         for i in range(len(self.entry_list)):
+    #             self.globalparams_list[i]=bool(self.entry_list[i].get())
+    #     if self.type=="radiobutton":
+    #         self.globalparams_list[0]=self.v.get()
+    #     self.onepointfit()
+    # def submit_colorplot(self):
+    #     if self.type=="int":
+    #         for i in range(len(self.entry_list)):
+    #             self.globalparams_list[i]=int(self.entry_list[i].get())
+    #     if self.type=="float":
+    #         for i in range(len(self.entry_list)):
+    #             self.globalparams_list[i]=float(self.entry_list[i].get())
+    #     if self.type=="str":
+    #         for i in range(len(self.entry_list)):
+    #             self.globalparams_list[i]=str(self.entry_list[i].get())
+    #     if self.type=="bool":
+    #         for i in range(len(self.entry_list)):
+    #             self.globalparams_list[i]=bool(self.entry_list[i].get())
+    #     if self.type=="radiobutton":
+    #         self.globalparams_list[0]=self.v.get()
+    #     self.canvas.root.update_plot()
     # def switch(self,plot=True):
     #     if self.globalparams_list[0]==True:
     #         self.globalparams_list[0]=False
@@ -88,24 +88,24 @@ class ButtonsAndEntries:
     #     if plot==True:
     #         self.canvas.root.master.plot()
     
-    def fit(self):
-        self.canvas.root.master.fit()
-    def onepointfit(self):
-        axis=(self.canvas.root.master.ax1,self.canvas.root.master.ax2,self.canvas.root.master.ax3)
-        index=self.canvas.root.master.index
-        index_crop=self.canvas.root.master.index_crop
-        draw_canvas=self.canvas.root.master.canvas
-        self.canvas.root.master.port=self.canvas.root.master.master.master.onepointfit(index,index_crop,axis,draw_canvas)
-        self.canvas.root.master.fr_min=self.canvas.root.master.master.master.frmin
-        self.canvas.root.master.parameterschart.update()
-    def customize_plot(self):
-        self.canvas.root.master.customize_plot() 
-    def color_plot(self):
-        self.canvas.root.master.color_plot()
+    # def fit(self):
+    #     self.canvas.root.master.fit()
+    # def onepointfit(self):
+    #     axis=(self.canvas.root.master.ax1,self.canvas.root.master.ax2,self.canvas.root.master.ax3)
+    #     index=self.canvas.root.master.index
+    #     index_crop=self.canvas.root.master.index_crop
+    #     draw_canvas=self.canvas.root.master.canvas
+    #     self.canvas.root.master.port=self.canvas.root.master.master.master.onepointfit(index,index_crop,axis,draw_canvas)
+    #     self.canvas.root.master.fr_min=self.canvas.root.master.master.master.frmin
+    #     self.canvas.root.master.parameterschart.update()
+    # def customize_plot(self):
+    #     self.canvas.root.master.customize_plot() 
+    # def color_plot(self):
+    #     self.canvas.root.master.color_plot()
 
 class Switchs(ButtonsAndEntries):
-    def __init__(self,canvas,controller,parameter,text,button_width=50,button_height=50,label_width=50,label_height=80,y_button=20):
-        super().__init__(controller)
+    def __init__(self,canvas,parameter,text,button_width=50,button_height=50,label_width=50,label_height=80,y_button=20):
+        super().__init__(self.canvas.controller)
         self.button=tk.Button(canvas.root, text="On", command=lambda: self.switch(parameter))
         canvas.create_window(canvas.posx, canvas.posy+y_button,width=button_width,height=button_height,
                                    window=self.button)
@@ -119,8 +119,8 @@ class Switchs(ButtonsAndEntries):
             self.button.configure(text="On")
             self.controller.parameters[parameter]=False
 class RadioButtons(ButtonsAndEntries):
-    def __init__(self,canvas,controller,parameter,possible_values,text,button_width=50,button_height=50,label_width=50,label_height=80,y_button=20):
-        super().__init__(controller)
+    def __init__(self,canvas,parameter,possible_values,text,button_width=50,button_height=50,label_width=50,label_height=80,y_button=20):
+        super().__init__(self.canvas.controller)
         self.v = tk.StringVar(value=self.controller.parameters[parameter])
         self.button_list=[]
         for i in range(len(possible_values)):
@@ -133,8 +133,8 @@ class RadioButtons(ButtonsAndEntries):
     def submit(self,parameter):
         self.controller.parameters[parameter]=self.v.get()
 class Entries(ButtonsAndEntries):
-    def __init__(self,canvas,controller,parameter_list,labels_list,type_list,button_width=50,button_height=50,label_width=50,label_height=80,y_button=20):
-        super().__init__(controller)
+    def __init__(self,canvas,parameter_list,labels_list,type_list,button_width=50,button_height=50,label_width=50,label_height=80,y_button=20):
+        super().__init__(self.canvas.controller)
         self.entry_list=[]
         for i in range(len(parameter_list)):
             self.entry_list.append(tk.Entry(canvas.root))
@@ -146,8 +146,8 @@ class Entries(ButtonsAndEntries):
         for i in range(len(self.entry_list)):
             self.controller.parameters[parameter_list[i]]=type_list[i](self.entry_list[i].get())
 class Navigator(ButtonsAndEntries):
-    def __init__(self,canvas,controller,parameter,possible_values,text,type=str,button_width=50,button_height=50,label_width=50,label_height=80,entry_width=50,entry_height=50,y_button=20):
-        super().__init__(controller)
+    def __init__(self,canvas,parameter,possible_values,text,type=str,button_width=50,button_height=50,label_width=50,label_height=80,entry_width=50,entry_height=50,y_button=20):
+        super().__init__(self.canvas.controller)
         self.entry=tk.Entry(canvas.root)
         canvas.create_window(canvas.posx, canvas.posy+y_button,width=entry_width,height=entry_height,window=self.entry)
         self.entry.insert(0, self.controller.parameters[parameter])
@@ -178,8 +178,8 @@ class Navigator(ButtonsAndEntries):
     def submit(self,parameter,type):
         self.controller.parameters[parameter]=type(self.entry.get())
 class FunctionButtons(ButtonsAndEntries):
-    def __init__(self,canvas,controller,func,text,button_width=50,button_height=50):
-        super().__init__(controller)
+    def __init__(self,canvas,func,text,button_width=50,button_height=50):
+        super().__init__(self.canvas.controller)
         canvas.create_window(canvas.posx, canvas.posy,width=button_width,height=button_height,
                                    window=tk.Button(canvas.root, text=text, command=lambda: func))
 
