@@ -8,7 +8,7 @@ class SweepsDataframe(Dataframe):
     def __init__(self,root):
         Dataframe.__init__(self,root)
     def update(self):
-        global sweep_list
+        sweep_list=[int(self.root.parameters["sweep_ini"]),int(self.root.parameters["sweep_end"]),int(self.root.parameters["sweep_step"])]
         try:
             temp_ini=self.root.temp[sweep_list[0]][0]
             temp_end=self.root.temp[sweep_list[1]-1][0]

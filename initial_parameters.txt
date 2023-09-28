@@ -1,7 +1,7 @@
 file 0
 colormap coolwarm
 yplot S21
-xlabel $\mathrm{Frequency}$ $\mathrm{(GHz)}$
+xlabel $\mathrm{Frequency(GHz)}$
 xlabel_fontsize 15
 ylabel_fontsize 15
 title None
@@ -9,6 +9,8 @@ title_fontsize 15
 colorbar_sweep T
 colorbar_bool True
 colorbar_fontsize 15
+xscale linear
+yscale linear
 linewidth 1
 markersize 1
 linestyle solid
@@ -17,6 +19,10 @@ shift 0
 grid_bool True
 ticks_fontsize 15
 guessdelay False
+baseline_file 0
+baseline_sweep 0
+baseline_shift 0
+smooth 0
 opf_xlabel_1 $\mathrm{Re(S}_{21}\mathrm{)}$
 opf_xlabel_2 $\mathrm{Frequency}\mathrm{(GHz)}$
 opf_xlabel_3 $\mathrm{Frequency}\mathrm{(GHz)}$
@@ -40,8 +46,7 @@ fw_ylabel_fontsize 15
 fw_suptitle_fontsize 15
 fw_grid_bool False
 fw_suptitle None
-fw_suptitle_fontsize 15
-
+fw_title_fontsize 15
 sweep_ini 0
 sweep_end -1
 sweep_step 1
@@ -55,4 +60,3 @@ xmin None
 xmax None
 ymin None
 ymax None
-

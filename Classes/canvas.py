@@ -4,24 +4,32 @@ MENU_COLOR="#1B252F"
 
 
 class ControlCanvas(tk.Canvas):
-    def __init__(self,root):
+    def __init__(self,root,controller,xini=100,yini=100):
         tk.Canvas.__init__(self,root,bg=MENU_COLOR)
-        self.controller=self.root.controller
+        self.root=root
+        self.controller=controller
         self.object_list=[]
-        self.posx=0
-        self.posy=0
-    def add_object(self,object,x=0,y=0):
+        self.posx=xini
+        self.posy=yini
+    def move(self,x,y):
         self.posx+=x
         self.posy+=y
+    def add_object(self,object):
         self.object_list.append(object)
     def clear(self):
         for widgets in self.winfo_children():
             widgets.destroy()
         self.posy=0
+    def submit_all(self):
+        for object in self.object_list:
+            try:
+                object.submit()
+            except:
+                pass
 
 class InformationChart(tk.Canvas):
-    def __init__(self,root,Df):
-        global sweep_list
+    def __init__(self,root,Df,controller):
+        self.controller=controller
         self.root=root
         self.Df=Df
         self.df=Df.df

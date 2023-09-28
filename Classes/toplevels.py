@@ -1,5 +1,5 @@
 import tkinter as tk
-import matplotlib as plt
+import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from resonator_tools import circuit
@@ -22,27 +22,51 @@ class plotWindow(tk.Toplevel):
         self.wm_title("Plot parameters")
         self.configure(bg=HOMEPAGEBG)
         self.create_controlcanvas()
+        self.bind("<Return>",lambda event:[print("plotWindow"),self.controlcanvas.submit_all()])
+
     def create_controlcanvas(self):
-        self.controlcanvas=ControlCanvas(self)
+        self.controlcanvas=ControlCanvas(self,self.controller)
         xsep=500
         ysep=200
-        Fontsize=Entries(self.controlcanvas,["xlabel_fontsize","ylabel_fontsize","title_fontsize","tick_fontsize","colorbar_fontsize"],["xlabel","ylabel","title","ticks","colorbar"],[float,float,float,float,float])
-        PlotLabels=Entries(self.controlcanvas,["xlabel","title"],["xlabel","title"],[str,str])
-        XTicks=Entries(self.controlcanvas,["xticks_ini","xticks_end","xticks_nintervals"],["xticks_ini","xticks_end","xticks_nintervals"],[float,float,int])
-        YTicks=Entries(self.controlcanvas,["yticks_ini","yticks_end","yticks_nintervals"],["yticks_ini","yticks_end","yticks_nintervals"],[float,float,int])
-        Linestyle=Entries(self.controlcanvas,["linestyle"],["linestyle"],[str])	
-        Linewidth=Entries(self.controlcanvas,["linewidth"],["linewidth"],[float])
-        TicksIn=Switchs(self.controlcanvas,"ticks_in","ticksin")
-        GridBool=Switchs(self.controlcanvas,"grid_bool","grid")
-
+        
+        Fontsize=Entries(self.controlcanvas,["xlabel_fontsize","ylabel_fontsize","title_fontsize","ticks_fontsize","colorbar_fontsize"],["xlabel","ylabel","title","ticks","colorbar"],[float,float,float,float,float])
         self.controlcanvas.add_object(Fontsize)
-        self.controlcanvas.add_object(PlotLabels,x=xsep)
-        self.controlcanvas.add_object(GridBool,x=-xsep,y=ysep)
-        self.controlcanvas.add_object(XTicks,x=xsep)
-        self.controlcanvas.add_object(YTicks,x=-xsep,y=ysep)
-        self.controlcanvas.add_object(Linestyle,x=xsep)
-        self.controlcanvas.add_object(Linewidth,x=-xsep,y=ysep)
-        self.controlcanvas.add_object(TicksIn,x=xsep)
+        self.controlcanvas.move(xsep,0)
+        
+        PlotLabels=Entries(self.controlcanvas,["xlabel","title"],["xlabel","title"],[str,str])
+        self.controlcanvas.add_object(PlotLabels)
+        self.controlcanvas.move(-xsep,ysep)
+        
+        GridBool=Switchs(self.controlcanvas,"grid_bool","grid")
+        self.controlcanvas.add_object(GridBool)
+        self.controlcanvas.move(xsep,0)
+
+        XTicks=Entries(self.controlcanvas,["xticks_ini","xticks_end","xticks_nintervals"],["xticks_ini","xticks_end","xticks_nintervals"],[float,float,int])
+        self.controlcanvas.add_object(XTicks)
+        self.controlcanvas.move(-xsep,ysep)
+
+        YTicks=Entries(self.controlcanvas,["yticks_ini","yticks_end","yticks_nintervals"],["yticks_ini","yticks_end","yticks_nintervals"],[float,float,int])
+        self.controlcanvas.add_object(YTicks)
+        self.controlcanvas.move(xsep,0)
+        
+        Linestyle=Entries(self.controlcanvas,["linestyle"],["linestyle"],[str])	
+        self.controlcanvas.add_object(Linestyle)
+        self.controlcanvas.move(-xsep,ysep)
+        
+        Linewidth=Entries(self.controlcanvas,["linewidth"],["linewidth"],[float])
+        self.controlcanvas.add_object(Linewidth)
+        self.controlcanvas.move(xsep,0)
+        
+        TicksIn=Switchs(self.controlcanvas,"ticks_in","ticksin")
+        self.controlcanvas.add_object(TicksIn)
+        self.controlcanvas.move(-xsep,ysep)
+        
+        XScale=Navigator(self.controlcanvas,"xscale",["linear","log"],"xscale")
+        self.controlcanvas.add_object(XScale)
+        self.controlcanvas.move(xsep,0)
+        
+        YScale=Navigator(self.controlcanvas,"yscale",["linear","log"],"yscale") 
+        self.controlcanvas.add_object(YScale)
         self.controlcanvas.pack(side='top',fill='both',expand=True,pady=10, padx=10)
 class ColorPlot(tk.Toplevel):
     def __init__(self,controller):
@@ -56,6 +80,7 @@ class ColorPlot(tk.Toplevel):
         #initialize empty figure
         self.fig=plt.figure(figsize=(15,5),dpi=100)
         self.ax=self.fig.add_subplot(111)
+        self.cbar=None
         self.canvas=FigureCanvasTkAgg(self.fig,self)
         self.canvas.get_tk_widget().pack(side=tk.TOP, expand=True)
         toolbar = NavigationToolbar2Tk(self.canvas, self)
@@ -64,6 +89,7 @@ class ColorPlot(tk.Toplevel):
         self.plot()
         self.create_controlcanvas()
         self.cut_cursor()
+        self.bind("<Return>",lambda event:[self.controlcanvas.submit_all(),self.plot()])
 
     def cut_cursor(self):
         cursor=Cursor(self.ax, useblit=True,horizOn=True,vertOn=True,color='red', linewidth=2)
@@ -81,14 +107,15 @@ class ColorPlot(tk.Toplevel):
         self.fig.canvas.mpl_connect('button_press_event', onclick)
     def create_controlcanvas(self):
         #add ControlCanvas
-        self.controlcanvas=ControlCanvas(self)
+        self.controlcanvas=ControlCanvas(self,self.controller)
         xsep=350
         cp_Title=Entries(self.controlcanvas,["cp_title"],["title"],[str])
         self.controlcanvas.add_object(cp_Title)
         cp_Fontsize=Entries(self.controlcanvas,["cp_title_fontsize","cp_xlabel_fontsize","cp_ylabel_fontsize","cp_colorbar_title_fontsize","cp_ticks_fontsize"],["title","xlabel","ylabel","colorbar title","ticks"],[float,float,float,float,float])
-        self.controlcanvas.add_object(cp_Fontsize,x=xsep)
+        self.controlcanvas.add_object(cp_Fontsize)
+        self.controlcanvas.move(xsep,0)
         cp_Colormap=Navigator(self.controlcanvas,"cp_colormap",COLORMAP_LIST,"colormap")
-        self.controlcanvas.add_object(cp_Colormap,x=xsep)
+        self.controlcanvas.add_object(cp_Colormap)
         self.controlcanvas.pack(side='top',fill='x',pady=10, padx=10)
     def initialize_data(self):
         sweep_list=[int(self.controller.parameters["sweep_ini"]),int(self.controller.parameters["sweep_end"]),int(self.controller.parameters["sweep_step"])]
@@ -99,27 +126,34 @@ class ColorPlot(tk.Toplevel):
         self.X,self.Y=np.meshgrid(self.x/1e9,self.y)
     def plot(self):
         self.ax.clear()
-        cp_colormap=self.controller.parameters["cp_colormap"]
-        cp_title=self.controller.parameters["cp_title"]
-        cp_title_fontsize=self.controller.parameters["cp_title_fontsize"]
-        cp_xlabel=self.controller.parameters["xlabel"]
-        cp_xlabel_fontsize=self.controller.parameters["cp_xlabel_fontsize"]
-        cp_ylabel=self.controller.parameters["colorbar_title"]
-        cp_ylabel_fontsize=self.controller.parameters["cp_ylabel_fontsize"]
-        cp_colorbar_title=self.controller.parameters["ylabel"]
-        cp_colorbar_title_fontsize=self.controller.parameters["cp_colorbar_title_fontsize"]
-        cp_ticks_fontsize=self.controller.parameters["cp_ticks_fontsize"]
-        cmap=plt.get_cmap(cp_colormap)     
-
-        self.imagen=self.ax.pcolormesh(self.X,self.Y,self.Z,cmap=cmap)
-        self.ax.set_xlabel(cp_xlabel,fontsize=cp_xlabel_fontsize)
-        self.ax.set_ylabel(cp_ylabel,fontsize=cp_ylabel_fontsize)
-        self.ax.set_title(cp_title,fontsize=cp_title_fontsize)
-        self.cbar=plt.colorbar(self.imagen,ax=self.ax)
-        self.cbar.ax.set_title(cp_colorbar_title,fontsize=cp_colorbar_title_fontsize)
+        #delete the colorbar if it exists
+        if hasattr(self, 'cbar') and self.cbar is not None:
+            self.cbar.remove()
+            self.cbar=None
+        cp_colormap = self.controller.parameters["cp_colormap"]
+        cp_title = self.controller.parameters["cp_title"]
+        cp_title_fontsize = self.controller.parameters["cp_title_fontsize"]
+        cp_xlabel = self.controller.parameters["xlabel"]
+        cp_xlabel_fontsize = self.controller.parameters["cp_xlabel_fontsize"]
+        cp_ylabel = self.controller.parameters["colorbar_title"]
+        cp_ylabel_fontsize = self.controller.parameters["cp_ylabel_fontsize"]
+        cp_colorbar_title = self.controller.parameters["ylabel"]
+        cp_colorbar_title_fontsize = self.controller.parameters["cp_colorbar_title_fontsize"]
+        cp_ticks_fontsize = self.controller.parameters["cp_ticks_fontsize"]
+        
+        cmap = plt.get_cmap(cp_colormap)
+        
+        self.imagen = self.ax.pcolormesh(self.X, self.Y, self.Z, cmap=cmap)
+        self.ax.set_xlabel(cp_xlabel, fontsize=cp_xlabel_fontsize)
+        self.ax.set_ylabel(cp_ylabel, fontsize=cp_ylabel_fontsize)
+        self.ax.set_title(cp_title, fontsize=cp_title_fontsize)
+        
+        self.cbar = plt.colorbar(self.imagen, ax=self.ax)
+        self.cbar.ax.set_title(cp_colorbar_title, fontsize=cp_colorbar_title_fontsize)
         self.cbar.ax.tick_params(labelsize=cp_ticks_fontsize)
+        
         self.ax.tick_params(axis='both', which='major', labelsize=cp_ticks_fontsize)
-        self.canvas.draw() 
+        self.canvas.draw()
 class fitWindow(tk.Toplevel):
     def __init__(self,controller,number_of_fits):
         tk.Toplevel.__init__(self,controller)
@@ -153,17 +187,20 @@ class fitWindow(tk.Toplevel):
                     index_crop=np.argmin(np.abs(self.root.itvector[sweep_list[0]:sweep_list[1]:sweep_list[2],0]-xevent))
                     OnePointFitWindow(self,index_crop)
             self.create_controlcanvas()
-            
+            self.bind("<Return>",lambda event:[self.controlcanvas.submit_all(),self.plot()])
             cid = self.fig.canvas.mpl_connect('button_press_event', onclick)
         else:
             OnePointFitWindow(self,0)
+        
     def create_controlcanvas(self):
-        self.controlcanvas=ControlCanvas(self)
+        self.controlcanvas=ControlCanvas(self,self.controller)
         xsep=400
         fw_Suptitle=Entries(self.controlcanvas,["fw_suptitle"],["suptitle"],[str])
-        self.controlcanvas.add_object(fw_Suptitle,x=xsep)
+        self.controlcanvas.add_object(fw_Suptitle)
+        self.controlcanvas.move(xsep,0)
         fw_SuptitleFontsize=Entries(self.controlcanvas,["fw_suptitle_fontsize"],["title"],[float])
-        self.controlcanvas.add_object(fw_SuptitleFontsize,x=xsep)
+        self.controlcanvas.add_object(fw_SuptitleFontsize)
+        self.controlcanvas.move(xsep,0)
         fw_Save=FunctionButtons(self.controlcanvas,self.save,"Save")
         self.controlcanvas.add_object(fw_Save,x=400)
         self.controlcanvas.pack(side=tk.TOP, fill="x", expand=True)
@@ -207,10 +244,34 @@ class fitWindow(tk.Toplevel):
         y3=self.controller.Qc_fit_list
         y2err=self.controller.Qi_err_fit_list
         y3err=self.controller.Qc_err_fit_list
+        try:
+            bx=self.controller.bx[sweep_list[0]:sweep_list[1]:sweep_list[2],0]
+        except:
+            bx=np.zeros(len(x))
+        try:
+            by=self.controller.by[sweep_list[0]:sweep_list[1]:sweep_list[2],0]
+        except:
+            by=np.zeros(len(x))
+        try:
+            bz=self.controller.bz[sweep_list[0]:sweep_list[1]:sweep_list[2],0]
+        except:
+            bz=np.zeros(len(x))
+        try:
+            temp=self.controller.temp[sweep_list[0]:sweep_list[1]:sweep_list[2],0]
+        except:
+            temp=np.zeros(len(x))
+        try:
+            power=self.controller.power[sweep_list[0]:sweep_list[1]:sweep_list[2],0]
+        except:
+            power=np.zeros(len(x))
+        try:
+            bandwidth=self.controller.bandwidth[sweep_list[0]:sweep_list[1]:sweep_list[2],0]
+        except:
+            bandwidth=np.zeros(len(x))
         with open(filename,'w') as o:
-            print("x\ty1\ty2\ty2err\ty3\ty3err",file=o)
+            print("x\ty1\ty2\ty2err\ty3\ty3err\tbx\tby\tbz\ttemp\tpower\tbandwidth",file=o)
             for i in range(len(x)):
-                print(str(x[i])+"\t"+str(y1[i])+"\t"+str(y2[i])+"\t"+str(y2err[i])+"\t"+str(y3[i])+"\t"+str(y3err[i]),file=o)  
+                print(str(x[i])+"\t"+str(y1[i])+"\t"+str(y2[i])+"\t"+str(y2err[i])+"\t"+str(y3[i])+"\t"+str(y3err[i])+"\t"+str(bx[i])+"\t"+str(by[i])+"\t"+str(bz[i])+"\t"+str(temp[i])+"\t"+str(power[i])+"\t"+str(bandwidth[i]),file=o)
 class OnePointFitWindow(tk.Toplevel):
     def __init__(self,root,index_crop):
         tk.Toplevel.__init__(self,root)
@@ -234,6 +295,7 @@ class OnePointFitWindow(tk.Toplevel):
         self.canvas._tkcanvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
         
         self.create_controlcanvas()
+        self.bind("<Return>",lambda event:[self.controlcanvas.submit_all(),self.plot()])
     def initialize_data(self):
         self.x=self.controller.freq[self.index]
         self.z=self.controller.amplitude_complex[self.index]
@@ -307,18 +369,22 @@ class OnePointFitWindow(tk.Toplevel):
         self.parameterschart=InformationChart(self,ParametersDataframe(self))
         self.parameterschart.treeview.pack(fill='both',expand=True)
     def create_controlcanvas(self):
-        self.controlcanvas=ControlCanvas(self)
+        self.controlcanvas=ControlCanvas(self,self.controller)
         xsep=400
         opf_button=FunctionButtons(self.controlcanvas,self.fit_button_function,"Fit")
         self.controlcanvas.add_object(opf_button)
+        self.controlcanvas.move(xsep,0)
         opf_Fontsize=Entries(self.controlcanvas,["opf_fontsize"],["fontsize"],[float])
-        self.controlcanvas.add_object(opf_Fontsize,x=xsep)
+        self.controlcanvas.add_object(opf_Fontsize)
+        self.controlcanvas.move(xsep,0)
         opf_GridBool=Switchs(self.controlcanvas,"opf_grid_bool","grid")
-        self.controlcanvas.add_object(opf_GridBool,x=xsep)
+        self.controlcanvas.add_object(opf_GridBool)
+        self.controlcanvas.move(xsep,0)
         opf_Save=FunctionButtons(self.controlcanvas,self.save,"Save")
-        self.controlcanvas.add_object(opf_Save,x=xsep)
+        self.controlcanvas.add_object(opf_Save)
+        self.controlcanvas.move(xsep,0)
         opf_SaveChart=FunctionButtons(self.controlcanvas,self.save_chart,"Save chart")
-        self.controlcanvas.add_object(opf_SaveChart,x=xsep)
+        self.controlcanvas.add_object(opf_SaveChart)
         self.controlcanvas.pack(fill='x',expand=True)
         self.mainloop()
     def fit_button_function(self):
