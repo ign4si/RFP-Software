@@ -94,13 +94,16 @@ class Compensation(Windows):
         fig.subplots_adjust(left=0.2)
         xplot=self.bfield[::2,0]
         yplot=self.xmin_list
-        ax.plot(xplot,yplot,'-o',label="Data")
-        fit=np.polyfit(xplot,yplot,1)
-        ax.plot(xplot,fit[0]*xplot+fit[1],"--",label="Fit. \nSlope="+str(fit[0])+"\nIntercept="+str(fit[1])+r" $\mathrm{T}$")
-        if isinstance(self.bx,type(None)):
-            ax.set_xlabel("$\mathrm{B_z} \mathrm{(T)}$")
-        else:
-            ax.set_xlabel("$\mathrm{B_x} \mathrm{(T)}$")
-        ax.set_ylabel("$\mathrm{B_y} \mathrm{(T)}$")
-        ax.legend()
+        ax.plot(xplot,yplot,'-o')
+        if len(yplot)>1:
+            fit=np.polyfit(xplot,yplot,1)
+            ax.plot(xplot,fit[0]*xplot+fit[1],"--")
+            if isinstance(self.bx,type(None)):
+                ax.set_xlabel("$\mathrm{B_z} \mathrm{(T)}$")
+            else:
+                ax.set_xlabel("$\mathrm{B_x} \mathrm{(T)}$")
+            ax.set_ylabel("$\mathrm{B_y} \mathrm{(T)}$")
+            ax.legend(["Data","Fit. \nSlope="+str(fit[0])+"\nIntercept="+str(fit[1])+r" $\mathrm{T}$"])
+        elif len(yplot)==1:
+            ax.legend(["{}".format(yplot)])
         return fig,ax

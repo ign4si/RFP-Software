@@ -14,7 +14,8 @@ SMALL_FONT = ("CMU Serif", 6)
 
 COLORMAP_LIST=['Accent', 'Accent_r', 'Blues', 'Blues_r', 'BrBG', 'BrBG_r', 'BuGn', 'BuGn_r', 'BuPu', 'BuPu_r', 'CMRmap', 'CMRmap_r', 'Dark2', 'Dark2_r', 'GnBu', 'GnBu_r', 'Greens', 'Greens_r', 'Greys', 'Greys_r', 'OrRd', 'OrRd_r', 'Oranges', 'Oranges_r', 'PRGn', 'PRGn_r', 'Paired', 'Paired_r', 'Pastel1', 'Pastel1_r', 'Pastel2', 'Pastel2_r', 'PiYG', 'PiYG_r', 'PuBu', 'PuBuGn', 'PuBuGn_r', 'PuBu_r', 'PuOr', 'PuOr_r', 'PuRd', 'PuRd_r', 'Purples', 'Purples_r', 'RdBu', 'RdBu_r', 'RdGy', 'RdGy_r', 'RdPu', 'RdPu_r', 'RdYlBu', 'RdYlBu_r', 'RdYlGn', 'RdYlGn_r', 'Reds', 'Reds_r', 'Set1', 'Set1_r', 'Set2', 'Set2_r', 'Set3', 'Set3_r', 'Spectral', 'Spectral_r', 'Wistia', 'Wistia_r', 'YlGn', 'YlGnBu', 'YlGnBu_r', 'YlGn_r', 'YlOrBr', 'YlOrBr_r', 'YlOrRd', 'YlOrRd_r', 'afmhot', 'afmhot_r', 'autumn', 'autumn_r', 'binary', 'binary_r', 'bone', 'bone_r', 'brg', 'brg_r', 'bwr', 'bwr_r', 'cividis', 'cividis_r', 'cool', 'cool_r', 'coolwarm', 'coolwarm_r', 'copper', 'copper_r', 'cubehelix', 'cubehelix_r', 'flag', 'flag_r', 'gist_earth', 'gist_earth_r', 'gist_gray', 'gist_gray_r', 'gist_heat', 'gist_heat_r', 'gist_ncar', 'gist_ncar_r', 'gist_rainbow', 'gist_rainbow_r', 'gist_stern', 'gist_stern_r', 'gist_yarg', 'gist_yarg_r', 'gnuplot', 'gnuplot2', 'gnuplot2_r', 'gnuplot_r', 'gray', 'gray_r', 'hot', 'hot_r', 'hsv', 'hsv_r', 'inferno', 'inferno_r', 'jet', 
 'jet_r', 'magma', 'magma_r', 'nipy_spectral', 'nipy_spectral_r', 'ocean', 'ocean_r', 'pink', 'pink_r', 'plasma', 'plasma_r', 'prism', 'prism_r', 'rainbow', 'rainbow_r', 'seismic', 'seismic_r', 'spring', 'spring_r', 'summer', 'summer_r', 'tab10', 'tab10_r', 'tab20', 'tab20_r', 'tab20b', 'tab20b_r', 'tab20c', 'tab20c_r', 'terrain', 'terrain_r', 'turbo', 'turbo_r', 'twilight', 'twilight_r', 'twilight_shifted', 'twilight_shifted_r', 'viridis', 'viridis_r', 'winter', 'winter_r']
-
+LINESTYLE_LIST=['-', '--', '-.', ':', 'None', ' ', '', 'solid', 'dashed', 'dashdot', 'dotted']
+MARKER_LIST=[".",",","o","v","^","<",">","1","2","3","4","8","s","p","P","*","h","H","+","D","d"]
 class plotWindow(tk.Toplevel):
     def __init__(self,controller):
         tk.Toplevel.__init__(self,controller)
@@ -37,7 +38,7 @@ class plotWindow(tk.Toplevel):
         self.controlcanvas.add_object(PlotLabels)
         self.controlcanvas.move(-xsep,ysep)
         
-        GridBool=Switchs(self.controlcanvas,"grid_bool","grid")
+        GridBool=Switchs(self.controlcanvas,"grid_bool","grid",spec_func_on=self.controller.plot,spec_func_off=self.controller.plot)
         self.controlcanvas.add_object(GridBool)
         self.controlcanvas.move(xsep,0)
 
@@ -49,21 +50,24 @@ class plotWindow(tk.Toplevel):
         self.controlcanvas.add_object(YTicks)
         self.controlcanvas.move(xsep,0)
         
-        Linestyle=Entries(self.controlcanvas,["linestyle"],["linestyle"],[str])	
-        self.controlcanvas.add_object(Linestyle)
+        Marker=Navigator(self.controlcanvas,"marker",MARKER_LIST,"marker",type=str)
+        self.controlcanvas.add_object(Marker)
         self.controlcanvas.move(-xsep,ysep)
+        Linestyle=Navigator(self.controlcanvas,"linestyle",LINESTYLE_LIST,"linestyle",type=str)	
+        self.controlcanvas.add_object(Linestyle)
+        self.controlcanvas.move(xsep,0)
         
         Linewidth=Entries(self.controlcanvas,["linewidth"],["linewidth"],[float])
         self.controlcanvas.add_object(Linewidth)
-        self.controlcanvas.move(xsep,0)
-        
-        TicksIn=Switchs(self.controlcanvas,"ticks_in","ticksin")
-        self.controlcanvas.add_object(TicksIn)
         self.controlcanvas.move(-xsep,ysep)
+        
+        TicksIn=Switchs(self.controlcanvas,"ticks_in","ticksin",spec_func_on=self.controller.plot,spec_func_off=self.controller.plot)
+        self.controlcanvas.add_object(TicksIn)
+        self.controlcanvas.move(xsep,0)
         
         XScale=Navigator(self.controlcanvas,"xscale",["linear","log"],"xscale")
         self.controlcanvas.add_object(XScale)
-        self.controlcanvas.move(xsep,0)
+        self.controlcanvas.move(-xsep,ysep)
         
         YScale=Navigator(self.controlcanvas,"yscale",["linear","log"],"yscale") 
         self.controlcanvas.add_object(YScale)
@@ -80,7 +84,6 @@ class ColorPlot(tk.Toplevel):
         #initialize empty figure
         self.fig=plt.figure(figsize=(15,5),dpi=100)
         self.ax=self.fig.add_subplot(111)
-        self.cbar=None
         self.canvas=FigureCanvasTkAgg(self.fig,self)
         self.canvas.get_tk_widget().pack(side=tk.TOP, expand=True)
         toolbar = NavigationToolbar2Tk(self.canvas, self)
@@ -89,7 +92,7 @@ class ColorPlot(tk.Toplevel):
         self.plot()
         self.create_controlcanvas()
         self.cut_cursor()
-        self.bind("<Return>",lambda event:[self.controlcanvas.submit_all(),self.plot()])
+        self.bind("<Return>",lambda event:[self.controlcanvas.submit_all(),self.update_plot()])
 
     def cut_cursor(self):
         cursor=Cursor(self.ax, useblit=True,horizOn=True,vertOn=True,color='red', linewidth=2)
@@ -125,11 +128,6 @@ class ColorPlot(tk.Toplevel):
         self.Z=self.controller.yplot[sweep_list[0]:sweep_list[1]:sweep_list[2],:]
         self.X,self.Y=np.meshgrid(self.x/1e9,self.y)
     def plot(self):
-        self.ax.clear()
-        #delete the colorbar if it exists
-        if hasattr(self, 'cbar') and self.cbar is not None:
-            self.cbar.remove()
-            self.cbar=None
         cp_colormap = self.controller.parameters["cp_colormap"]
         cp_title = self.controller.parameters["cp_title"]
         cp_title_fontsize = self.controller.parameters["cp_title_fontsize"]
@@ -147,8 +145,31 @@ class ColorPlot(tk.Toplevel):
         self.ax.set_xlabel(cp_xlabel, fontsize=cp_xlabel_fontsize)
         self.ax.set_ylabel(cp_ylabel, fontsize=cp_ylabel_fontsize)
         self.ax.set_title(cp_title, fontsize=cp_title_fontsize)
-        
         self.cbar = plt.colorbar(self.imagen, ax=self.ax)
+        self.cbar.ax.set_title(cp_colorbar_title, fontsize=cp_colorbar_title_fontsize)
+        self.cbar.ax.tick_params(labelsize=cp_ticks_fontsize)
+        
+        self.ax.tick_params(axis='both', which='major', labelsize=cp_ticks_fontsize)
+        self.canvas.draw()
+    def update_plot(self):
+        cp_colormap = self.controller.parameters["cp_colormap"]
+        cp_title = self.controller.parameters["cp_title"]
+        cp_title_fontsize = self.controller.parameters["cp_title_fontsize"]
+        cp_xlabel = self.controller.parameters["xlabel"]
+        cp_xlabel_fontsize = self.controller.parameters["cp_xlabel_fontsize"]
+        cp_ylabel = self.controller.parameters["colorbar_title"]
+        cp_ylabel_fontsize = self.controller.parameters["cp_ylabel_fontsize"]
+        cp_colorbar_title = self.controller.parameters["ylabel"]
+        cp_colorbar_title_fontsize = self.controller.parameters["cp_colorbar_title_fontsize"]
+        cp_ticks_fontsize = self.controller.parameters["cp_ticks_fontsize"]
+        
+        cmap = plt.get_cmap(cp_colormap)
+        
+        self.imagen.set_cmap(cmap)
+        self.ax.set_xlabel(cp_xlabel, fontsize=cp_xlabel_fontsize)
+        self.ax.set_ylabel(cp_ylabel, fontsize=cp_ylabel_fontsize)
+        self.ax.set_title(cp_title, fontsize=cp_title_fontsize)
+        self.cbar.update_normal(self.imagen)
         self.cbar.ax.set_title(cp_colorbar_title, fontsize=cp_colorbar_title_fontsize)
         self.cbar.ax.tick_params(labelsize=cp_ticks_fontsize)
         
@@ -184,7 +205,7 @@ class fitWindow(tk.Toplevel):
                     if event.inaxes!=self.ax1 and event.inaxes!=self.ax2 and event.inaxes!=self.ax3:
                         return None
                     xevent=event.xdata
-                    index_crop=np.argmin(np.abs(self.root.itvector[sweep_list[0]:sweep_list[1]:sweep_list[2],0]-xevent))
+                    index_crop=np.argmin(np.abs(self.controller.itvector[sweep_list[0]:sweep_list[1]:sweep_list[2],0]-xevent))
                     OnePointFitWindow(self,index_crop)
             self.create_controlcanvas()
             self.bind("<Return>",lambda event:[self.controlcanvas.submit_all(),self.plot()])
@@ -202,7 +223,7 @@ class fitWindow(tk.Toplevel):
         self.controlcanvas.add_object(fw_SuptitleFontsize)
         self.controlcanvas.move(xsep,0)
         fw_Save=FunctionButtons(self.controlcanvas,self.save,"Save")
-        self.controlcanvas.add_object(fw_Save,x=400)
+        self.controlcanvas.add_object(fw_Save)
         self.controlcanvas.pack(side=tk.TOP, fill="x", expand=True)
     def plot(self):
         self.ax1.clear()
@@ -219,10 +240,9 @@ class fitWindow(tk.Toplevel):
         fw_xlabel_fontsize=self.controller.parameters["fw_xlabel_fontsize"]
         fw_ylabel_fontsize=self.controller.parameters["fw_ylabel_fontsize"]
         fw_suptitle_fontsize=self.controller.parameters["fw_title_fontsize"]
-
-        self.ax1.plot(self.root.itvector[sweep_list[0]:sweep_list[1]:sweep_list[2],0],np.array(self.root.frmin_fit_list)/1e9,'o',color='black')
-        self.ax2.errorbar(self.root.itvector[sweep_list[0]:sweep_list[1]:sweep_list[2],0],self.root.Qi_fit_list,yerr=self.root.Qi_err_fit_list,fmt='o',color='black')
-        self.ax3.errorbar(self.root.itvector[sweep_list[0]:sweep_list[1]:sweep_list[2],0],self.root.Qc_fit_list,yerr=self.root.Qc_err_fit_list,fmt='o',color='black')
+        self.ax1.plot(self.controller.itvector[sweep_list[0]:sweep_list[1]:sweep_list[2],0],np.array(self.controller.frmin_fit_list)/1e9,'o',color='black')
+        self.ax2.errorbar(self.controller.itvector[sweep_list[0]:sweep_list[1]:sweep_list[2],0],self.controller.Qi_fit_list,yerr=self.controller.Qi_err_fit_list,fmt='o',color='black')
+        self.ax3.errorbar(self.controller.itvector[sweep_list[0]:sweep_list[1]:sweep_list[2],0],self.controller.Qc_fit_list,yerr=self.controller.Qc_err_fit_list,fmt='o',color='black')
         self.ax1.set_xlabel(fw_xlabel,fontsize=fw_xlabel_fontsize)
         self.ax1.set_ylabel(fw_ylabel_1,fontsize=fw_ylabel_fontsize)
         self.ax2.set_xlabel(fw_xlabel,fontsize=fw_xlabel_fontsize)
@@ -287,14 +307,16 @@ class OnePointFitWindow(tk.Toplevel):
 
         #initialize empty figure
         self.fig,(self.ax1,self.ax2,self.ax3)=plt.subplots(1,3,figsize=(15,5),dpi=100)
-        self.plot()
         self.canvas=FigureCanvasTkAgg(self.fig,self)
+        self.plot()
+        
         self.canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=True)
         toolbar = NavigationToolbar2Tk(self.canvas, self)
         toolbar.update()
         self.canvas._tkcanvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
         
         self.create_controlcanvas()
+        self.create_parameterschart()
         self.bind("<Return>",lambda event:[self.controlcanvas.submit_all(),self.plot()])
     def initialize_data(self):
         self.x=self.controller.freq[self.index]
@@ -331,7 +353,7 @@ class OnePointFitWindow(tk.Toplevel):
         self.ax3.clear()
 
         colorbar_sweep=self.controller.parameters["colorbar_sweep"]
-        self.wm_title("Fit at "+colorbar_sweep+" "+str(self.root.root.itvector[self.index,0]))
+        self.wm_title("Fit at "+colorbar_sweep+" "+str(self.controller.itvector[self.index,0]))
 
         opf_xlabel_1=self.controller.parameters["opf_xlabel_1"]
         opf_ylabel_1=self.controller.parameters["opf_ylabel_1"]
@@ -388,8 +410,8 @@ class OnePointFitWindow(tk.Toplevel):
         self.controlcanvas.pack(fill='x',expand=True)
         self.mainloop()
     def fit_button_function(self):
-        xmin,xmax=self.ax1.get_xlim()
-        self.cond=np.logical_and(self.x>xmin,self.x<xmax)
+        xmin,xmax=self.ax2.get_xlim()
+        self.cond=np.logical_and(self.x>(xmin*1e9),self.x<(xmax*1e9))
         self.fit()
         self.plot()
         self.root.plot()

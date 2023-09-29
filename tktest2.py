@@ -103,7 +103,6 @@ class MainContainer(tk.Tk):
             frame.grid(row=0, column=0, sticky="nsew")
         frame=self.frames[cont]
         frame.tkraise()
-        
         # if cont==Workspace:
             # frame.title.text=folder
     def back_to_start(self):

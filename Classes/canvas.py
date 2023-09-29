@@ -21,11 +21,18 @@ class ControlCanvas(tk.Canvas):
             widgets.destroy()
         self.posy=0
     def submit_all(self):
+        autoscale=0
         for object in self.object_list:
             try:
-                object.submit()
+                if object.check_change():
+                    object.submit()
+                    if object.autoscale:
+                        autoscale=1
             except:
                 pass
+        self.controller.plot()
+        if autoscale==1:
+            self.controller.autoscale()
 
 class InformationChart(tk.Canvas):
     def __init__(self,root,Df,controller):

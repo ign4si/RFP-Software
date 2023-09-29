@@ -60,7 +60,6 @@ class Workspace(Windows):
         self.rightframe=tk.Frame(self,width=200)
         self.leftframe.pack(side='left',fill='both',expand=True)
         self.rightframe.pack(side='right',fill='both',expand=False)
-        
         #create the figure 
         self.f=Figure(figsize=(5,5),dpi=100)
         self.a=self.f.add_subplot(111)
@@ -77,7 +76,18 @@ class Workspace(Windows):
         
        
         
+        self.create_controlcanvas()
 
+        self.dataframe_list.append(SweepsDataframe(self))
+        self.dataframe_list.append(NumberDataframe(self))
+        
+        for i in self.dataframe_list:
+            self.informationchart_list.append(InformationChart(self.rightframe,i,self))
+
+        for i in self.informationchart_list:
+            i.treeview.pack(side='top',fill='x',expand=False)
+        self.bind_all("<Return>",lambda event:[print("Workspace"),self.controlcanvas.submit_all()])
+    def create_controlcanvas(self):
         #create the canvas for the buttons
         self.controlcanvas=ControlCanvas(self.rightframe,self)
 
@@ -87,56 +97,63 @@ class Workspace(Windows):
         SweepFile=Entries(self.controlcanvas,["file"],["file"],[int])
         self.controlcanvas.add_object(SweepFile)
         self.controlcanvas.move(xsep,0)
+
         SweepEntries=Entries(self.controlcanvas,["sweep_ini","sweep_end","sweep_step"],["ini","end","step"],[int,int,int])
         self.controlcanvas.add_object(SweepEntries)
         self.controlcanvas.move(-xsep,ysep)
-        Shift=Entries(self.controlcanvas,["shift"],["shift"],[float])
+
+        Shift=Entries(self.controlcanvas,["shift"],["shift"],[float],autoscale=True)
         self.controlcanvas.add_object(Shift)
         self.controlcanvas.move(xsep,0)
+
         Colour=Navigator(self.controlcanvas,"colormap",COLORMAP_LIST,"colormap")
         self.controlcanvas.add_object(Colour)
         self.controlcanvas.move(-xsep,ysep)
-        Cbar=Switchs(self.controlcanvas,"colorbar_bool","colorbar_bool")
+
+        Cbar=Switchs(self.controlcanvas,"colorbar_bool","colorbar_bool",spec_func_on=lambda: self.plot(),spec_func_off=lambda: self.plot())
         self.controlcanvas.add_object(Cbar)
         self.controlcanvas.move(xsep,0)
+
         CbarSweep=Navigator(self.controlcanvas,"colorbar_sweep",["T","P","B","Bx","By","Bz"],"cbar")
         self.controlcanvas.add_object(CbarSweep)
         self.controlcanvas.move(-xsep,ysep)
+
         Fit=FunctionButtons(self.controlcanvas,self.fit,"Fit")
         self.controlcanvas.add_object(Fit)
         self.controlcanvas.move(xsep,0)
+
         GuessDelay=Switchs(self.controlcanvas,"guessdelay","guessdelay")
         self.controlcanvas.add_object(GuessDelay)
         self.controlcanvas.move(-xsep,ysep)
+
         PlotParameters=FunctionButtons(self.controlcanvas,self.customize_plot,"Plot Parameters")
         self.controlcanvas.add_object(PlotParameters)
         self.controlcanvas.move(xsep,0)
-        PlotY=Navigator(self.controlcanvas,"yplot",["S21","S21dB","Phase"],"y")
+
+        PlotY=Navigator(self.controlcanvas,"yplot",["S21","S21dB","Phase"],"y",autoscale=True)
         self.controlcanvas.add_object(PlotY)
         self.controlcanvas.move(-xsep,ysep)
-        Baseline=FunctionButtons(self.controlcanvas,[self.load_baseline,self.plot],"Baseline")
+
+        Baseline=FunctionButtons(self.controlcanvas,lambda: [self.load_baseline(),self.add_baseline(),self.smooth_data(),self.plot(),self.autoscale()],"Baseline")
         self.controlcanvas.add_object(Baseline)
         self.controlcanvas.move(xsep,0)
-        BaselineSweep=Entries(self.controlcanvas,["baseline_file","baseline_sweep","baseline_shift"],["file","sweep","shift"],[int,int,float])
+
+        BaselineSweep=Entries(self.controlcanvas,["baseline_file","baseline_sweep","baseline_shift"],["file","sweep","shift"],[int,int,float],spec_func=lambda:[self.add_baseline(),self.smooth_data()])
         self.controlcanvas.add_object(BaselineSweep)
         self.controlcanvas.move(-xsep,ysep)
-        Smooth=Entries(self.controlcanvas,["smooth"],["smooth"],[int])
+
+        Smooth=Entries(self.controlcanvas,["smooth"],["smooth"],[int],spec_func=lambda:[self.add_baseline(),self.smooth_data()])
         self.controlcanvas.add_object(Smooth)
         self.controlcanvas.move(xsep,0)
+
         ColorPlotButton=FunctionButtons(self.controlcanvas,self.color_plot,"Color Plot")
         self.controlcanvas.add_object(ColorPlotButton)
         self.controlcanvas.move(-xsep,ysep)
-        self.controlcanvas.pack(side='top',fill='both',expand=True)
-        self.dataframe_list.append(SweepsDataframe(self))
-        self.dataframe_list.append(NumberDataframe(self))
-        
-        for i in self.dataframe_list:
-            self.informationchart_list.append(InformationChart(self.rightframe,i,self))
 
-        for i in self.informationchart_list:
-            i.treeview.pack(side='top',fill='x',expand=False)
-        self.bind_all("<Return>",lambda event:[print("Workspace"),self.controlcanvas.submit_all(),self.plot()])
-        
+        Autoscale=FunctionButtons(self.controlcanvas,self.autoscale,"Autoscale")
+        self.controlcanvas.add_object(Autoscale)
+        self.controlcanvas.move(xsep,0)
+        self.controlcanvas.pack(side='top',fill='both',expand=True)
     def initialize_parameters(self):
         filename="initial_parameters.txt"
         dicparameters={}
@@ -175,28 +192,37 @@ class Workspace(Windows):
             self.parameters["sweep_end"]=-1
             self.parameters["sweep_step"]=1
     def load_baseline(self):
-        baseline_folder=self.select_folder()
-        self.parameters["baseline_folder"]=baseline_folder
+        self.parameters["baseline_folder"]=self.select_folder()
+        if self.parameters["baseline_folder"]!=None:
+            try:
+                self.Baseline=edf.Data(self.parameters["baseline_folder"],verbose=True)
+            except:
+                print("Baseline not loaded")
+    def add_baseline(self):
         baseline_sweep=[int(self.parameters["baseline_file"]),int(self.parameters["baseline_sweep"]),float(self.parameters["baseline_shift"])]
-        if baseline_folder!="":
-            self.Baseline=edf.Data(baseline_folder,verbose=True)
+        file=int(self.parameters["file"])
+        if self.parameters["baseline_folder"]!=None and self.parameters["baseline_folder"]!="":
             self.Baseline_amplitude_DB=self.Baseline.S21_DB[baseline_sweep[0]][baseline_sweep[1]]
             self.Baseline_phase=self.Baseline.phase[baseline_sweep[0]][baseline_sweep[1]]
-
         else:
-            self.Baseline_amplitude_DB=np.zeros(self.freq[0].shape)
-            self.Baseline_phase=np.zeros(self.freq[0].shape)
+            self.Baseline_amplitude_DB=np.zeros(len(self.Data.freq[0][0]))
+            self.Baseline_phase=np.zeros(len(self.Data.freq[0][0]))
 
-        self.amplitude_DB=np.array([self.amplitude_DB[i]-self.Baseline_amplitude_DB+baseline_sweep[2] for i in range(len(self.amplitude_DB))])
-        self.phase=np.array([self.phase[i]-self.Baseline_phase for i in range(len(self.phase))])
+        self.amplitude_DB=np.array([self.Data.S21_DB[file][i]-self.Baseline_amplitude_DB+baseline_sweep[2] for i in range(len(self.Data.S21_DB[file]))])
+        self.phase=np.array([self.Data.phase[file][i]-self.Baseline_phase for i in range(len(self.Data.phase[file]))])
         self.amplitude=np.power(10,self.amplitude_DB/20)
         self.amplitude_complex=self.amplitude*np.exp(1j*self.phase)
+
     def smooth_data(self):
         smoothlist=int(self.parameters["smooth"])
+
         self.amplitude_DB=np.array([smoothfunc(self.amplitude_DB[i],smoothlist) for i in range(len(self.amplitude_DB))])
         self.phase=np.array([smoothfunc(self.phase[i],smoothlist) for i in range(len(self.phase))])
         self.amplitude=np.power(10,self.amplitude_DB/20)
         self.amplitude_complex=self.amplitude*np.exp(1j*self.phase)
+
+
+
     def save_limits(self):
         xmin,xmax=self.a.get_xlim()
         ymin,ymax=self.a.get_ylim()
@@ -214,6 +240,7 @@ class Workspace(Windows):
         title=self.parameters["title"]
         title_fontsize=float(self.parameters["title_fontsize"])
         linewidth=float(self.parameters["linewidth"])
+        marker=self.parameters["marker"]
         markersize=float(self.parameters["markersize"])
         linestyle=self.parameters["linestyle"]
         ticksin=bool(self.parameters["ticks_in"])
@@ -223,7 +250,6 @@ class Workspace(Windows):
         ticks_fontsize=float(self.parameters["ticks_fontsize"])
         grid_bool=bool(self.parameters["grid_bool"])
         file=int(self.parameters["file"]) 
-
         # print("xscale=",xscale)
         # print("yscale=",yscale)
         # print("shift=",shift)
@@ -257,6 +283,7 @@ class Workspace(Windows):
             self.save_limits()
         self.a.clear()
 
+        
 
         if self.parameters["yplot"]=="S21":
             self.yplot=self.amplitude
@@ -333,9 +360,9 @@ class Workspace(Windows):
 
         for j in range(sweep_list[0],sweep_list[1],sweep_list[2]):
             if last_value==first_value:
-                self.a.plot(self.freq[j]/1e9, self.yplot[j]+shift*j,color=cmap(j/sweep_list[1]),linewidth=linewidth,linestyle=linestyle,markersize=markersize)
+                self.a.plot(self.freq[j]/1e9, self.yplot[j]+shift*j,color=cmap(j/sweep_list[1]),marker=marker,linewidth=linewidth,linestyle=linestyle,markersize=markersize)
             else:
-                self.a.plot(self.freq[j]/1e9, self.yplot[j]+shift*j,color=cmap((self.itvector[j][0]-first_value)/(last_value-first_value)),linewidth=linewidth,linestyle=linestyle,markersize=markersize)
+                self.a.plot(self.freq[j]/1e9, self.yplot[j]+shift*j,color=cmap((self.itvector[j][0]-first_value)/(last_value-first_value)),marker=marker,linewidth=linewidth,linestyle=linestyle,markersize=markersize)
         
         self.sm = matplotlib.pyplot.cm.ScalarMappable(cmap=cmap, norm=matplotlib.pyplot.Normalize(vmin=first_value, vmax=last_value))
         if colorbar_bool:
@@ -370,7 +397,6 @@ class Workspace(Windows):
             self.a.tick_params(direction='in')
         else:
             self.a.tick_params(direction='out')
-        self.canvas.draw()
         for i in self.informationchart_list:
             i.update()
         if self.parameters["xmin"]!=None and self.parameters["xmax"]!=None and self.parameters["ymin"]!=None and self.parameters["ymax"]!=None:
@@ -378,10 +404,13 @@ class Workspace(Windows):
             self.a.set_ylim([float(self.parameters["ymin"]),float(self.parameters["ymax"])])
         else:
             self.save_limits()
+        self.canvas.draw()
 
 
         
-        
+    def autoscale(self):
+        self.a.autoscale()
+        self.canvas.draw()
     def fit(self):
         sweep_list=[int(self.parameters["sweep_ini"]),int(self.parameters["sweep_end"]),int(self.parameters["sweep_step"])]
 

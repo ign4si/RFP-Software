@@ -14,6 +14,7 @@ yscale linear
 linewidth 1
 markersize 1
 linestyle solid
+marker .
 ticks_in True
 shift 0
 grid_bool True
