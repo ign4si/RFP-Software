@@ -13,6 +13,7 @@ class Switchs(ButtonsAndEntries):
         super().__init__(canvas.controller)
         self.spec_func_on=spec_func_on
         self.spec_func_off=spec_func_off
+        self.autoscale=False
         self.button=tk.Button(canvas.root, text="On", command=lambda: self.switch(parameter))
         canvas.create_window(canvas.posx, canvas.posy+y_button,width=button_width,height=button_height,
                                    window=self.button)
@@ -27,6 +28,10 @@ class Switchs(ButtonsAndEntries):
             self.button.configure(text="On")
             self.controller.parameters[parameter]=True
             self.spec_func_on()
+    def check_change(self):
+        pass
+    def submit(self):
+        pass
 class RadioButtons(ButtonsAndEntries):
     def __init__(self,canvas,parameter,possible_values,text,autoscale=False,button_width=50,button_height=20,label_width=50,label_height=30,y_button=20):
         super().__init__(canvas.controller)
@@ -112,3 +117,7 @@ class FunctionButtons(ButtonsAndEntries):
         super().__init__(canvas.controller)
         canvas.create_window(canvas.posx, canvas.posy,width=button_width,height=button_height,
                                    window=tk.Button(canvas.root, text=text, command=func))
+    def check_change(self):
+        pass
+    def submit(self):
+        pass

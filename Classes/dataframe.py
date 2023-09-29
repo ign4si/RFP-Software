@@ -57,6 +57,7 @@ class ParametersDataframe(Dataframe):
         Dataframe.__init__(self,root)
     def update(self):
         port=self.root.port
+        print(self.root.index_crop)
         Qi=port.fitresults['Qi_dia_corr']
         Qi_err=port.fitresults['Qi_dia_corr_err']
         Qc=port.fitresults['absQc']

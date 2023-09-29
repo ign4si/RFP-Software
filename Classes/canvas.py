@@ -23,13 +23,10 @@ class ControlCanvas(tk.Canvas):
     def submit_all(self):
         autoscale=0
         for object in self.object_list:
-            try:
-                if object.check_change():
-                    object.submit()
-                    if object.autoscale:
-                        autoscale=1
-            except:
-                pass
+            if object.check_change():
+                object.submit()
+                if object.autoscale:
+                    autoscale=1
         self.controller.plot()
         if autoscale==1:
             self.controller.autoscale()

@@ -86,7 +86,7 @@ class Workspace(Windows):
 
         for i in self.informationchart_list:
             i.treeview.pack(side='top',fill='x',expand=False)
-        self.bind_all("<Return>",lambda event:[print("Workspace"),self.controlcanvas.submit_all()])
+        self.bind_all("<Return>",lambda event:[self.controlcanvas.submit_all()])
     def create_controlcanvas(self):
         #create the canvas for the buttons
         self.controlcanvas=ControlCanvas(self.rightframe,self)
@@ -207,19 +207,21 @@ class Workspace(Windows):
         else:
             self.Baseline_amplitude_DB=np.zeros(len(self.Data.freq[0][0]))
             self.Baseline_phase=np.zeros(len(self.Data.freq[0][0]))
-
         self.amplitude_DB=np.array([self.Data.S21_DB[file][i]-self.Baseline_amplitude_DB+baseline_sweep[2] for i in range(len(self.Data.S21_DB[file]))])
         self.phase=np.array([self.Data.phase[file][i]-self.Baseline_phase for i in range(len(self.Data.phase[file]))])
         self.amplitude=np.power(10,self.amplitude_DB/20)
-        self.amplitude_complex=self.amplitude*np.exp(1j*self.phase)
+        hola=1j*self.phase
+        hola=hola.astype(complex)
+        self.amplitude_complex=self.amplitude*np.exp(hola)
 
     def smooth_data(self):
         smoothlist=int(self.parameters["smooth"])
-
         self.amplitude_DB=np.array([smoothfunc(self.amplitude_DB[i],smoothlist) for i in range(len(self.amplitude_DB))])
         self.phase=np.array([smoothfunc(self.phase[i],smoothlist) for i in range(len(self.phase))])
         self.amplitude=np.power(10,self.amplitude_DB/20)
-        self.amplitude_complex=self.amplitude*np.exp(1j*self.phase)
+        hola=1j*self.phase
+        hola=hola.astype(complex)
+        self.amplitude_complex=self.amplitude*np.exp(hola)
 
 
 
@@ -250,24 +252,6 @@ class Workspace(Windows):
         ticks_fontsize=float(self.parameters["ticks_fontsize"])
         grid_bool=bool(self.parameters["grid_bool"])
         file=int(self.parameters["file"]) 
-        # print("xscale=",xscale)
-        # print("yscale=",yscale)
-        # print("shift=",shift)
-        # print("xlabel=",xlabel)
-        # print("xlabel_fontsize=",xlabel_fontsize)
-        # print("ylabel_fontsize=",ylabel_fontsize)
-        # print("title=",title)
-        # print("title_fontsize=",title_fontsize)
-        # print("linewidth=",linewidth)
-        # print("markersize=",markersize)
-        # print("linestyle=",linestyle)
-        # print("ticksin=",ticksin)
-        # print("sweep_list=",sweep_list)
-        # print("colorbar_bool=",colorbar_bool)
-        # print("colorbar_fontsize=",colorbar_fontsize)
-        # print("ticks_fontsize=",ticks_fontsize)
-        # print("grid_bool=",grid_bool)
-        # print("file=",file)
 
         if self.parameters["xticks_ini"]==None:
             xticks=None

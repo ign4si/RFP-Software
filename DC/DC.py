@@ -71,7 +71,7 @@ class Compensation(Windows):
             self.bfield=self.bx
 
     def find_min(self):
-        window_size=[10]
+        window_size=[20]
         for i in range(0,len(self.by),2):
                 xmin_fs,ymin_fs=find_min(self.by[i,:],self.r[i,:],window_size=window_size[0])
                 xmin_bs,ymin_bs=find_min(self.by[i+1,:],self.r[i+1,:],window_size=window_size[0])

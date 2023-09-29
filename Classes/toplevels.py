@@ -304,7 +304,6 @@ class OnePointFitWindow(tk.Toplevel):
 
         self.initialize_data()
         self.fit()
-
         #initialize empty figure
         self.fig,(self.ax1,self.ax2,self.ax3)=plt.subplots(1,3,figsize=(15,5),dpi=100)
         self.canvas=FigureCanvasTkAgg(self.fig,self)
@@ -388,7 +387,7 @@ class OnePointFitWindow(tk.Toplevel):
         
         self.canvas.draw()
     def create_parameterschart(self):
-        self.parameterschart=InformationChart(self,ParametersDataframe(self))
+        self.parameterschart=InformationChart(self,ParametersDataframe(self),self.controller)
         self.parameterschart.treeview.pack(fill='both',expand=True)
     def create_controlcanvas(self):
         self.controlcanvas=ControlCanvas(self,self.controller)
@@ -408,13 +407,15 @@ class OnePointFitWindow(tk.Toplevel):
         opf_SaveChart=FunctionButtons(self.controlcanvas,self.save_chart,"Save chart")
         self.controlcanvas.add_object(opf_SaveChart)
         self.controlcanvas.pack(fill='x',expand=True)
-        self.mainloop()
     def fit_button_function(self):
         xmin,xmax=self.ax2.get_xlim()
         self.cond=np.logical_and(self.x>(xmin*1e9),self.x<(xmax*1e9))
         self.fit()
         self.plot()
-        self.root.plot()
+        try:
+            self.root.plot()
+        except:
+            pass
         self.parameterschart.update()
     def save(self):
         filename=tk.filedialog.asksaveasfilename(title="Select file",filetypes=(("txt files","*.txt"),("all files","*.*")))

@@ -13,15 +13,8 @@ import pandas as pd
 from resonator_tools import circuit
 
 matplotlib.rcParams['text.usetex'] = True   #Change to false if u dont have latex <3
-from Classes.windows import Windows
-from Classes.canvas import ControlCanvas,InformationChart
-from Classes.buttonsandentries import Switchs,Entries,Navigator,RadioButtons,FunctionButtons
-from Classes.toplevels import plotWindow,ColorPlot,fitWindow,OnePointFitWindow,CutWindow
-from Classes.dataframe import SweepsDataframe,NumberDataframe
 from StartPage.startpage import StartPage
-from Sonnet.sonnet_fitting import Sonnet
-from DC.DC import Compensation
-from RF.RF import Workspace
+
 LARGE_FONT = ("CMU Serif", 16)
 NORM_FONT = ("CMU Serif", 10)
 SMALL_FONT = ("CMU Serif", 6)
@@ -105,8 +98,13 @@ class MainContainer(tk.Tk):
         frame.tkraise()
         # if cont==Workspace:
             # frame.title.text=folder
+    def destroy_frames(self):
+        for frame in self.frames.values():
+            frame.grid_remove()
     def back_to_start(self):
-        self.show_frame(StartPage)
-
+        self.destroy_frames()
+        self.destroy()
+        app=MainContainer()
+        app.mainloop()
 app = MainContainer()
 app.mainloop()

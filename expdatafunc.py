@@ -24,7 +24,12 @@ class Data:
             self.number_of_points=number_of_points_list
             self.number_of_files=number_of_files
             self.S21=[10**(i/20) for i in self.S21_DB]
-            self.z=[self.S21[i]*np.exp(1j*self.phase[i]) for i in range(len(self.S21))]
+            try:
+                hola=1j*self.phase
+                hola=hola.astype(complex)
+                self.z=[self.S21[i]*np.exp(hola[i]) for i in range(len(self.S21))]
+            except:
+                self.z=[self.S21[i]*np.exp(1j*self.phase[i]) for i in range(len(self.S21))]
         if data_type=="Compensation":
             Data=read_datacomp(path)
             self.temp=Data[0]
