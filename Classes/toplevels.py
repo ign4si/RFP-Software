@@ -186,6 +186,7 @@ class fitWindow(tk.Toplevel):
         #initialize sweep_list
         sweep_list=[int(self.controller.parameters["sweep_ini"]),int(self.controller.parameters["sweep_end"]),int(self.controller.parameters["sweep_step"])]
         #create the figure
+        print(number_of_fits)
         if number_of_fits!=1:
             self.fig,(self.ax1,self.ax2,self.ax3)=plt.subplots(1,3,figsize=(15,5),dpi=100)
             self.canvas=FigureCanvasTkAgg(self.fig,self)

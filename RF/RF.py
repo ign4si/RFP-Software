@@ -45,10 +45,10 @@ class Workspace(Windows):
         self.controller=controller
         self.informationchart_list=[]
         self.dataframe_list=[]
-        self.folder=self.select_folder()
+        self.filename=self.select_file()
         self.parameters=self.initialize_parameters()
         #create the title and the back home button
-        self.title = tk.Label(self, text=self.folder, font=LARGE_FONT)
+        self.title = tk.Label(self, text=self.filename, font=LARGE_FONT)
         self.title.pack(side='top',fill='x',pady=10, padx=10)
 
         #create the back to home button
@@ -94,65 +94,61 @@ class Workspace(Windows):
         #create the button
         xsep=260
         ysep=70
-        SweepFile=Entries(self.controlcanvas,["file"],["file"],[int])
-        self.controlcanvas.add_object(SweepFile)
-        self.controlcanvas.move(xsep,0)
 
         SweepEntries=Entries(self.controlcanvas,["sweep_ini","sweep_end","sweep_step"],["ini","end","step"],[int,int,int])
         self.controlcanvas.add_object(SweepEntries)
-        self.controlcanvas.move(-xsep,ysep)
+        self.controlcanvas.move(xsep,0)
 
         Shift=Entries(self.controlcanvas,["shift"],["shift"],[float],autoscale=True)
         self.controlcanvas.add_object(Shift)
-        self.controlcanvas.move(xsep,0)
-
+        self.controlcanvas.move(-xsep,ysep)
         Colour=Navigator(self.controlcanvas,"colormap",COLORMAP_LIST,"colormap")
         self.controlcanvas.add_object(Colour)
-        self.controlcanvas.move(-xsep,ysep)
+        self.controlcanvas.move(xsep,0)
 
         Cbar=Switchs(self.controlcanvas,"colorbar_bool","colorbar_bool",spec_func_on=lambda: self.plot(),spec_func_off=lambda: self.plot())
         self.controlcanvas.add_object(Cbar)
-        self.controlcanvas.move(xsep,0)
+        self.controlcanvas.move(-xsep,ysep)
 
         CbarSweep=Navigator(self.controlcanvas,"colorbar_sweep",["T","P","B","Bx","By","Bz"],"cbar")
         self.controlcanvas.add_object(CbarSweep)
-        self.controlcanvas.move(-xsep,ysep)
+        self.controlcanvas.move(xsep,0)
 
         Fit=FunctionButtons(self.controlcanvas,self.fit,"Fit")
         self.controlcanvas.add_object(Fit)
-        self.controlcanvas.move(xsep,0)
+        self.controlcanvas.move(-xsep,ysep)
 
         GuessDelay=Switchs(self.controlcanvas,"guessdelay","guessdelay")
         self.controlcanvas.add_object(GuessDelay)
-        self.controlcanvas.move(-xsep,ysep)
+        self.controlcanvas.move(xsep,0)
 
         PlotParameters=FunctionButtons(self.controlcanvas,self.customize_plot,"Plot Parameters")
         self.controlcanvas.add_object(PlotParameters)
-        self.controlcanvas.move(xsep,0)
+        self.controlcanvas.move(-xsep,ysep)
 
         PlotY=Navigator(self.controlcanvas,"yplot",["S21","S21dB","Phase"],"y",autoscale=True)
         self.controlcanvas.add_object(PlotY)
-        self.controlcanvas.move(-xsep,ysep)
+        self.controlcanvas.move(xsep,0)
 
         Baseline=FunctionButtons(self.controlcanvas,lambda: [self.load_baseline(),self.add_baseline(),self.smooth_data(),self.plot(),self.autoscale()],"Baseline")
         self.controlcanvas.add_object(Baseline)
-        self.controlcanvas.move(xsep,0)
+        self.controlcanvas.move(-xsep,ysep)
 
         BaselineSweep=Entries(self.controlcanvas,["baseline_file","baseline_sweep","baseline_shift"],["file","sweep","shift"],[int,int,float],spec_func=lambda:[self.add_baseline(),self.smooth_data()])
         self.controlcanvas.add_object(BaselineSweep)
-        self.controlcanvas.move(-xsep,ysep)
+        self.controlcanvas.move(xsep,0)
 
         Smooth=Entries(self.controlcanvas,["smooth"],["smooth"],[int],spec_func=lambda:[self.add_baseline(),self.smooth_data()])
         self.controlcanvas.add_object(Smooth)
-        self.controlcanvas.move(xsep,0)
+        self.controlcanvas.move(-xsep,ysep)
 
         ColorPlotButton=FunctionButtons(self.controlcanvas,self.color_plot,"Color Plot")
         self.controlcanvas.add_object(ColorPlotButton)
-        self.controlcanvas.move(-xsep,ysep)
+        self.controlcanvas.move(xsep,0)
 
         Autoscale=FunctionButtons(self.controlcanvas,self.autoscale,"Autoscale")
         self.controlcanvas.add_object(Autoscale)
-        self.controlcanvas.move(xsep,0)
+        self.controlcanvas.move(-xsep,ysep)
         self.controlcanvas.pack(side='top',fill='both',expand=True)
     def initialize_parameters(self):
         filename="initial_parameters.txt"
@@ -171,7 +167,7 @@ class Workspace(Windows):
         return dicparameters
 
     def load_data(self,reset=True):
-        self.Data=edf.Data(self.folder,verbose=True)
+        self.Data=edf.Data(self.filename)
         file=int(self.parameters["file"])
         self.temp=self.Data.temp[file]
         self.power=self.Data.power[file]
