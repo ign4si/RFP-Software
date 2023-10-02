@@ -24,7 +24,12 @@ class Data:
             self.number_of_points=number_of_points_list
             self.number_of_files=number_of_files
             self.S21=[10**(i/20) for i in self.S21_DB]
-            self.z=[self.S21[i]*np.exp(1j*self.phase[i]) for i in range(len(self.S21))]
+            try:
+                hola=1j*self.phase
+                hola=hola.astype(complex)
+                self.z=[self.S21[i]*np.exp(hola[i]) for i in range(len(self.S21))]
+            except:
+                self.z=[self.S21[i]*np.exp(1j*self.phase[i]) for i in range(len(self.S21))]
         if data_type=="Compensation":
             Data=read_datacomp(path)
             self.temp=Data[0]
@@ -37,51 +42,6 @@ class Data:
             self.by=Data[7]
             self.bz=Data[8]
             self.time=Data[9]
-        elif data_type=="temp-power-sweep":
-            Data=TakeData(path)
-            self.temp=Data[0]
-            self.power=Data[1]
-            self.freq=Data[2]
-            self.S21_DB=Data[3]
-            self.phase=Data[4]
-            self.S21=[10**(i/20) for i in self.S21_DB]
-            self.z=[self.S21[i]*np.exp(1j*self.phase[i]) for i in range(len(self.S21))]
-        elif data_type=="CW":
-            Data=TakeDataCW(path)
-            self.time=Data[0]
-            self.real=Data[1]
-            self.imag=Data[2]
-            self.S21_DB=Data[3]
-            self.phase=Data[4]
-            self.S21=[10**(i/20) for i in self.S21_DB]
-            self.z=[self.S21[i]*np.exp(1j*self.phase[i]) for i in range(len(self.S21))]
-        elif data_type=="CW-powersweep":
-            Data=TakeDataCWPower(path,verbose=verbose)
-            self.time=Data[0]
-            self.power=Data[1]
-            self.bandwidth=Data[2]
-            self.real=Data[3]
-            self.imag=Data[4]
-            self.S21_DB=Data[5]
-            self.phase=Data[6]
-            self.S21=[10**(i/20) for i in self.S21_DB]
-            self.z=[self.S21[i]*np.exp(1j*self.phase[i]) for i in range(len(self.S21))]
-            if verbose:
-                print("The data has been read completely")
-                print("We have the following attributes:")
-                print("time, power, bandwidth, real, imag, S21_DB, phase, S21, z")
-        elif data_type=="General":
-            if freq_column==None:
-                print("Please specify the column of the frequency")
-            else:
-                self.Data=TakeDataGeneral(path,freq_column)
-            
-
-
-
-
-
-
 
 def read_datacomp(filename):
     global labels_datacomp
@@ -112,107 +72,20 @@ def read_datacomp(filename):
     return column_list
     
 
-def ReadFiles(path,sort,verbose=False):
-    dirs = os.listdir(path)
-    #read only the files that ends with "data"
-    
-    dirs = [file for file in dirs if file.endswith(".dat")]
-    if dirs!=[]:
-        if verbose:
-            print("This folder has been read: ",path)
-            print("The files are: ",len(dirs))
-    else: 
-        print("This folder is empty")
-    #sort dirs by the number in the file name
-    if sort:
-        dirs.sort(key=lambda x: float(x.split('=')[-1][:-4]))
-    #read the data from the files in dirs, skipping the first row
+def ReadFiles(filename):
     data = []
     headings=[]
-    for file in dirs:
-        data.append(np.loadtxt(path+"/"+file,skiprows=1))
-    with open(path+"/"+dirs[-1]) as f:
+    data.append(np.loadtxt(filename,skiprows=1))
+    with open(filename) as f:
         first_line=f.readline()
     headings.append(first_line.split()[1:])
-    return data,len(dirs),headings
+    return data,headings
 
-def ReadFilesGeneral(path):
-    dirs = os.listdir(path)
-    #read only the files that ends with "data"
-    
-    dirs = [file for file in dirs if file.endswith(".dat")]
-    if dirs!=[]:
-        print("This file has been read: ",path)
-        print("The files are: ",len(dirs))
-    data=[]
-    #read the first line of the dirs[0], that is the column names
-    with open(path+"/"+dirs[0]) as f:
-        first_line=f.readline()
-    column_names=first_line.split()[1:]
-
-    #read all files in dirs as a pandas dataframe, the header is column_names
-    for file in dirs:
-        data.append(pd.read_csv(path+"/"+file,sep="\t",names=column_names,skiprows=1))
-    return data
         
-def TakeData(path):
-    data=ReadFiles(path,sort=True,verbose=True)
-    temp=[]
-    power_list=[]
-    amplitude_list=[]
-    phase_list=[]
-    freq_list=[]
-    resonance_list=[]
-    resonance_depth_list=[]
-    resonance_amplitude_list=[]
-    for datas in data: #sweeping in the temperature
-        temp.append(datas[0,0])
-        freq=[]
-        amplitude=[]
-        power=[]
-        resonance=[]
-        phase=[]
-        resonance_depth=[]
-        resonance_amplitude=[]
-        number_powers=len(set(datas[:,1]))
-        number_data_points=len(datas[:,1])//number_powers
-        for i in range(number_powers): #sweeping in the power, change this for a while after
-            x=datas[i*number_data_points:(i+1)*number_data_points,2]
-            y=datas[i*number_data_points:(i+1)*number_data_points,5]
-            phase_=datas[i*number_data_points:(i+1)*number_data_points,6]
-            resonance_value=x[np.argmin(y)]
-            baseline_value=np.mean(np.concatenate((y[:10],y[-10:])))
-            resonance_amplitude_value=-np.min(y)
-            resonance_depth_value=baseline_value-np.min(y)
-            power_value=datas[i*number_data_points,1]
-            freq.append(x)
-            amplitude.append(y)
-            phase.append(phase_)
-            power.append(power_value)
-            resonance.append(resonance_value)
-            resonance_depth.append(resonance_depth_value)
-            resonance_amplitude.append(resonance_amplitude_value)
-        freq_list.append(np.array(freq)/1e9)
-        amplitude_list.append(amplitude)
-        phase_list.append(phase)
-        power_list.append(power)
-        resonance_list.append(np.array(resonance)/1e9)
-        resonance_depth_list.append(resonance_depth)
-        resonance_amplitude_list.append(resonance_amplitude)
-    print("number of temperatures: ",len(temp),"\nnumber of powers: ",number_powers,"\nnumber of frequency points: ",number_data_points)
-    power=np.array(power_list[0])
-    temp=np.array(temp)
-    freq_list=np.array(freq_list)
-    amplitude_list=np.array(amplitude_list)
-    phase_list=np.array(phase_list)
-    resonance_list=np.array(resonance_list)
-    resonance_depth_list=np.array(resonance_depth_list)
-    resonance_amplitude_list=np.array(resonance_amplitude_list)
-    return temp,power,freq_list,amplitude_list,phase_list,resonance_list,resonance_depth_list,resonance_amplitude_list
-
 def TakeDataNew(path,verbose=False):
     global labels
-    data,number_of_files,headings=ReadFiles(path,sort=False,verbose=verbose)
+    data,headings=ReadFiles(path)
+    number_of_files=1
     print(headings)
     #find the index of the labels in the headings
     index_list=[]
@@ -250,10 +123,8 @@ def TakeDataNew(path,verbose=False):
     number_of_points_list=np.array(number_of_points_list)
     number_of_simus_list=np.array(number_of_simus_list)
     
-    if verbose:
-        return files_list,number_of_points_list,number_of_simus_list,number_of_files
     
-    return files_list
+    return files_list,number_of_points_list,number_of_simus_list,number_of_files
 def TakeDataCW(path):
     data=ReadFiles(path,sort=False)
     time_list=[]
@@ -317,284 +188,6 @@ def TakeDataCWPower(path,verbose=False):
         print("So the total number of points should be: ",number_of_simus*number_of_points)
     return time_list,power_list,bandwidth_list,real_list,imag_list,amplitude_list,phase_list
 
-def TakeDataGeneral(path,freq_column):
-    data=ReadFilesGeneral(path)
-    column_names=data[0].columns
-    dict_list=[]
-    for datas in data: #sweeping in the datafiles
-        number_of_points=np.where(np.abs(np.diff(datas.iloc[:,freq_column]))>5)[0][0]+2
-        number_of_simus=len(datas.iloc[:,freq_column])//number_of_points
-        dict= {}
-        for i in range(len(column_names)):
-            dict[column_names[i]]=datas[:,i].reshape(number_of_simus,number_of_points)
-        dict_list.append(dict)
-    return dict_list
-
-
-
-def ColorPlot(path,x,z,*args,save=False,savepath=""):
-    '''
-    ColorPlot(path,x,z,*args,save=False,savepath=""):
-    path: The path to the data.
-    x="T" or x="P". To set the x-axis as temperature or power respectively.
-    z="a" or z="p". To set the z-axis as amplitude or phase respectively.
-    *args: The data to be plotted. If x is selected as T (P), values from P[i] (T[i]) for i in *args will be plotted.
-    save=False: Saves the plot if True.
-    savepath="": The path to save the plot. If save=False, savepath="".
-    '''
-    
-
-    Data=TakeData(path)
-    t=Data[0] #temperature list
-    p=Data[1] #power list
-    f=Data[2] #frequency 2d array
-    a=Data[3] #amplitude 2d array
-    ph=Data[4] #resonance 2d array
-    
-    if x=="T":
-        x_axis=t
-        x_label="Temperature (K)"
-        title="Power="
-        title_axis=p
-        unit="dBm"
-
-    elif x=="P":
-        x_axis=p
-        x_label="Power (dBm)"
-        title="Temperature="
-        title_axis=t
-        unit="K"
-    else:
-        raise ValueError("x must be either 'T' or 'P'")
-
-    if z=="a":
-        z_axis=a
-        z_label="Amplitude (dBm)"
-    elif z=="p":
-        z_axis=ph
-        z_label="Phase (degrees)"
-    else:
-        raise ValueError("z must be either 'a' or 'p'")
-    if len(args)==0:
-        for i in range(len(x_axis)):
-            X,Y=np.meshgrid(x_axis,f[i][0])
-            if x=="T":
-                Z=np.transpose(np.array(z_axis[:,i]))
-            elif x=="P":
-                Z=np.transpose(np.array(z_axis[i,:]))
-            plt.pcolormesh(X,Y,Z,cmap="jet")
-            plt.title(title+str(title_axis[i])+" "+unit)
-            plt.xlabel(x_label)
-            plt.ylabel("Frequency (GHz)")
-            plt.colorbar().set_label(z_label)
-            plt.show()
-            if save==True:
-                plt.savefig(savepath+str(title_axis[i])+" "+unit+".png")
-                plt.close()
-            else:
-                pass
-    else:
-        for i in args:
-            X,Y=np.meshgrid(x_axis,f[i][0])
-            if x=="T":
-                Z=np.transpose(np.array(z_axis[:,i]))
-            elif x=="P":
-                Z=np.transpose(np.array(z_axis[i,:]))
-
-            plt.pcolormesh(X,Y,Z,cmap="jet")
-            plt.title(title+str(title_axis[i])+" "+unit)
-            plt.xlabel(x_label)
-            plt.ylabel("Frequency (GHz)")
-            plt.colorbar().set_label(z_label)
-            plt.show()
-            if save==True:
-                plt.savefig(savepath+str(title_axis[i])+" "+unit+".png")
-                plt.close()
-            else:
-                pass
-
-def plot_CW(data_object,sweep,fq,extra_title="",shift=0,xlim=None,ylim=None,cmap="jet",savefig=None):
-    fig,ax=plt.subplots(1,2,figsize=(15,7))
-    axes=ax.flatten()
-    cmap=plt.get_cmap(cmap)
-    colors=[cmap(i) for i in np.linspace(0,1,len(data_object.power[sweep]))]
-    for i in range(len(data_object.power[sweep])-1,-1,-1):
-        x=data_object.time[sweep][i]
-        y=data_object.S21_DB[sweep][i]
-        axes[0].plot(x,y,color=colors[i],label="P={:.2f}dBm".format(data_object.power[sweep][i][0]+shift))
-    axes[0].set_title("CW fq={} GHz".format(fq))
-    axes[0].set_xlabel("Time (s)")
-    axes[0].set_ylabel("S21 (DB)")
-    axes[0].legend()
-    axes[0].set_xlim(0,data_object.time[sweep][-1][-1])
-    axes[0].grid()
-    if(xlim!=None):
-        axes[0].set_xlim(xlim)
-    if(ylim!=None):
-        axes[0].set_ylim(ylim)
-    
-    from scipy.fft import fft, fftfreq
-    #create the function that performs the FFT
-    def fft_func(x,y):
-        sampling_rate=1/(float(x[1])-float(x[0]))
-        N=len(x)
-        yf=fft(np.abs(y))
-        xf=fftfreq(N,1/sampling_rate)
-        return xf,yf
-
-    cmap=plt.get_cmap(cmap)
-    colors=[cmap(i) for i in np.linspace(0,1,len(data_object.power[sweep]))]
-    for i in range(len(data_object.power[sweep])-1,-1,-1):
-        x=data_object.time[sweep][i]
-        y=data_object.S21[sweep][i]
-        xf,yf=fft_func(x,y)
-        axes[1].plot(xf[xf>0]*data_object.bandwidth[sweep][0][0]/1000,np.abs(yf[xf>0])**2,color=colors[i],label="P={:.2f}dBm".format(data_object.power[sweep][i][0]+shift))
-    axes[1].set_title("FFT CW fq={} GHz".format(fq))
-    axes[1].set_xlabel("Freq (KHz)")
-    axes[1].set_ylabel("$FFT(|S21|)^2$")
-    axes[1].set_yscale("log")
-    axes[1].set_xscale("log")
-    axes[1].legend()
-    axes[1].grid()
-
-    #set the bandwith as a suptitle
-    plt.suptitle(extra_title+"Bandwidth={:.2f}Hz".format(data_object.bandwidth[sweep][0][0]))
-    if savefig!=None:
-        plt.savefig(savefig)
-
-    plt.show()
-
-def plot_CW_2(data_object,data_object2,sweep1,sweep2,fq,extra_title="",title1="",title2="",xlim=None,ylim=None,shift1=0,shift2=0,cmap="jet",savefig=None,dataindex1=[],dataindex2=[]):
-    fig,ax=plt.subplots(1,2,figsize=(15,7),sharey=True)
-    axes=ax.flatten()
-    
-    
-    from scipy.fft import fft, fftfreq
-    #create the function that performs the FFT
-    def fft_func(x,y):
-        sampling_rate=1/(float(x[1])-float(x[0]))
-        N=len(x)
-        yf=fft(np.abs(y))
-        xf=fftfreq(N,1/sampling_rate)
-        return xf,yf
-
-    cmap=plt.get_cmap(cmap)
-    colors=[cmap(i) for i in np.linspace(0,1,len(data_object.power[sweep1]))]
-    if dataindex1==[]:
-        for i in range(len(data_object.power[sweep1])-1,-1,-1):
-            x=data_object.time[sweep1][i]
-            y=data_object.S21[sweep1][i]
-            xf,yf=fft_func(x,y)
-            axes[0].plot(xf[xf>0]*data_object.bandwidth[sweep1][0][0]/1000,np.abs(yf[xf>0])**2,color=colors[i],label="P={:.2f}dBm".format(data_object.power[sweep1][i][0]+shift1))
-    else:
-        for i in dataindex1:
-            x=data_object.time[sweep1][i]
-            y=data_object.S21[sweep1][i]
-            xf,yf=fft_func(x,y)
-            axes[0].plot(xf[xf>0]*data_object.bandwidth[sweep1][0][0]/1000,np.abs(yf[xf>0])**2,color=colors[i],label="P={:.2f}dBm".format(data_object.power[sweep1][i][0]+shift1))
-    axes[0].set_title(title1+"FFT CW fq={} GHz".format(fq))
-    axes[0].set_xlabel("Freq (KHz)")
-    axes[0].set_ylabel("$FFT(|S21|)^2$")
-    axes[0].set_yscale("log")
-    axes[0].set_xscale("log")
-    axes[0].legend()
-    axes[0].grid()
-
-    #do the same as above for the second data object
-    cmap=plt.get_cmap(cmap)
-    colors=[cmap(i) for i in np.linspace(0,1,len(data_object2.power[sweep2]))]
-    if dataindex2==[]:
-        for i in range(len(data_object2.power[sweep2])-1,-1,-1):
-            x=data_object2.time[sweep2][i]
-            y=data_object2.S21[sweep2][i]
-            xf,yf=fft_func(x,y)
-            axes[1].plot(xf[xf>0]*data_object2.bandwidth[sweep2][0][0]/1000,np.abs(yf[xf>0]),color=colors[i],label="P={:.2f}dBm".format(data_object2.power[sweep2][i][0]+shift2))
-    else:
-        for i in dataindex2:
-            x=data_object2.time[sweep2][i]
-            y=data_object2.S21[sweep2][i]
-            xf,yf=fft_func(x,y)
-            axes[1].plot(xf[xf>0]*data_object2.bandwidth[sweep2][0][0]/1000,np.abs(yf[xf>0]),color=colors[i],label="P={:.2f}dBm".format(data_object2.power[sweep2][i][0]+shift2))
-    axes[1].set_title(title2+"FFT CW fq={} GHz".format(fq))
-    axes[1].set_xlabel("Freq (KHz)")
-    axes[1].set_yscale("log")
-    axes[1].set_xscale("log")
-    axes[1].legend()
-    axes[1].grid()
-
-
-    #set the bandwith as a suptitle
-    plt.suptitle(extra_title+"Bandwidth1={:.2f}Hz".format(data_object.bandwidth[sweep1][0][0])+"; Bandwidth2={:.2f}Hz".format(data_object2.bandwidth[sweep2][0][0]))
-    if savefig!=None:
-        plt.savefig(savefig)
-
-    plt.show()
-
-def plot_CW_2_especial(data_object,data_object2,sweep1,sweep2,fq,extra_title="",title1="",title2="",xlim=None,ylim=None,shift1=0,shift2=0,cmap="jet",savefig=None,dataindex1=[],dataindex2=[]):
-    fig,ax=plt.subplots(1,2,figsize=(15,7),sharey=True)
-    axes=ax.flatten()
-    
-    
-    from scipy.fft import fft, fftfreq
-    #create the function that performs the FFT
-    def fft_func(x,y):
-        sampling_rate=1/(float(x[1])-float(x[0]))
-        N=len(x)
-        yf=fft(np.abs(y))
-        xf=fftfreq(N,1/sampling_rate)
-        return xf,yf
-
-    cmap=plt.get_cmap(cmap)
-    colors=[cmap(i) for i in np.linspace(0,1,2)]
-    if dataindex1==[]:
-        for i in range(0,-1,-1):
-            x=data_object.time[sweep1]
-            y=data_object.S21[sweep1]
-            xf,yf=fft_func(x,y)
-            axes[0].plot(xf[xf>0]*100/1000,np.abs(yf[xf>0])**2,color=colors[i])
-    else:
-        for i in dataindex1:
-            x=data_object.time[sweep1]
-            y=data_object.S21[sweep1]
-            xf,yf=fft_func(x,y)
-            axes[0].plot(xf[xf>0]*100/1000,np.abs(yf[xf>0])**2,color=colors[i])
-    axes[0].set_title(title1+"FFT in Continuous wave in resonance in Resonator fq={} GHz".format(fq))
-    axes[0].set_xlabel("Freq (KHz)")
-    axes[0].set_ylabel("$FFT(|S21|)^2$")
-    axes[0].set_yscale("log")
-    axes[0].set_xscale("log")
-    axes[0].legend()
-    axes[0].grid()
-
-    #do the same as above for the second data object
-    cmap=plt.get_cmap(cmap)
-    colors=[cmap(i) for i in np.linspace(0,1,len(data_object2.power[sweep2]))]
-    if dataindex2==[]:
-        for i in range(len(data_object2.power[sweep2])-1,-1,-1):
-            x=data_object2.time[sweep2][i]
-            y=data_object2.S21[sweep2][i]
-            xf,yf=fft_func(x,y)
-            axes[1].plot(xf[xf>0]*data_object2.bandwidth[sweep2][0][0]/1000,np.abs(yf[xf>0]),color=colors[i],label="P={:.2f}dBm".format(data_object2.power[sweep2][i][0]+shift2))
-    else:
-        for i in dataindex2:
-            x=data_object2.time[sweep2][i]
-            y=data_object2.S21[sweep2][i]
-            xf,yf=fft_func(x,y)
-            axes[1].plot(xf[xf>0]*data_object2.bandwidth[sweep2][0][0]/1000,np.abs(yf[xf>0]),color=colors[i],label="P={:.2f}dBm".format(data_object2.power[sweep2][i][0]+shift2))
-    axes[1].set_title(title2+"FFT in Continuous wave in resonance in Resonator fq={} GHz".format(fq))
-    axes[1].set_xlabel("Freq (KHz)")
-    axes[1].set_yscale("log")
-    axes[1].set_xscale("log")
-    axes[1].legend()
-    axes[1].grid()
-
-
-    #set the bandwith as a suptitle
-    plt.suptitle(extra_title+"Bandwidth1={:.2f}Hz".format(100)+"; Bandwidth2={:.2f}Hz".format(data_object2.bandwidth[sweep2][0][0]))
-    if savefig!=None:
-        plt.savefig(savefig)
-
-    plt.show()
 def plot_CW_3(data_object,data_object2,sweep1,sweep2,fq,extra_title="",title1="",title2="",xlim1=None,ylim1=None,xlim2=None,ylim2=None,shift1=0,shift2=0,cmap="jet",savefig=None,dataindex1=[],dataindex2=[]):
     fig,ax=plt.subplots(1,2,figsize=(15,7))
     axes=ax.flatten()
