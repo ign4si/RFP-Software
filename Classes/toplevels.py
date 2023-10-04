@@ -24,6 +24,7 @@ class plotWindow(tk.Toplevel):
         self.configure(bg=HOMEPAGEBG)
         self.create_controlcanvas()
         self.bind("<Return>",lambda event:[print("plotWindow"),self.controlcanvas.submit_all()])
+        self.state('zoomed')
 
     def create_controlcanvas(self):
         self.controlcanvas=ControlCanvas(self,self.controller)
@@ -79,6 +80,7 @@ class ColorPlot(tk.Toplevel):
         self.configure(bg=HOMEPAGEBG)
         self.title=tk.Label(self,text="Color Plot",font=LARGE_FONT,bg=HOMEPAGEBG,fg="white")
         self.title.pack(side='top',fill='x',pady=10, padx=10)
+        self.state('zoomed')
         #initialize data
         self.initialize_data()
         #initialize empty figure
@@ -186,7 +188,7 @@ class fitWindow(tk.Toplevel):
         #initialize sweep_list
         sweep_list=[int(self.controller.parameters["sweep_ini"]),int(self.controller.parameters["sweep_end"]),int(self.controller.parameters["sweep_step"])]
         #create the figure
-        print(number_of_fits)
+        self.state('zoomed')
         if number_of_fits!=1:
             self.fig,(self.ax1,self.ax2,self.ax3)=plt.subplots(1,3,figsize=(15,5),dpi=100)
             self.canvas=FigureCanvasTkAgg(self.fig,self)
@@ -318,6 +320,7 @@ class OnePointFitWindow(tk.Toplevel):
         self.create_controlcanvas()
         self.create_parameterschart()
         self.bind("<Return>",lambda event:[self.controlcanvas.submit_all(),self.plot()])
+        self.state('zoomed')
     def initialize_data(self):
         self.x=self.controller.freq[self.index]
         self.z=self.controller.amplitude_complex[self.index]
@@ -453,7 +456,7 @@ class CutWindow(tk.Toplevel):
         toolbar.update()
         self.canvas._tkcanvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
         self.plot()
-
+        self.state('zoomed')
     def initialize_data(self):
         self.x=self.root.y
         self.fixed_freq=self.root.x[self.index]

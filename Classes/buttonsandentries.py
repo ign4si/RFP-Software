@@ -14,7 +14,11 @@ class Switchs(ButtonsAndEntries):
         self.spec_func_on=spec_func_on
         self.spec_func_off=spec_func_off
         self.autoscale=False
-        self.button=tk.Button(canvas.root, text="On", command=lambda: self.switch(parameter))
+        if self.controller.parameters[parameter]:
+            btext="On"
+        else:
+            btext="Off"
+        self.button=tk.Button(canvas.root, text=btext, command=lambda: self.switch(parameter))
         canvas.create_window(canvas.posx, canvas.posy+y_button,width=button_width,height=button_height,
                                    window=self.button)
         canvas.create_window(canvas.posx, canvas.posy,height=label_height,

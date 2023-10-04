@@ -20,8 +20,7 @@ shift 0
 grid_bool True
 ticks_fontsize 15
 guessdelay False
-baseline_folder None
-baseline_file 0
+baseline_file None
 baseline_sweep 0
 baseline_shift 0
 smooth 0

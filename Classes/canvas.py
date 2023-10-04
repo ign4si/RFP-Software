@@ -24,12 +24,18 @@ class ControlCanvas(tk.Canvas):
         autoscale=0
         for object in self.object_list:
             if object.check_change():
-                object.submit()
+                try:
+                    object.submit()
+                except:
+                    tk.messagebox.showinfo(title="Error",message="Invalid input")
                 if object.autoscale:
                     autoscale=1
-        self.controller.plot()
-        if autoscale==1:
-            self.controller.autoscale()
+        try:
+            self.controller.plot()
+            if autoscale==1:
+                self.controller.autoscale()
+        except:
+            tk.messagebox.showinfo(title="Error",message="Invalid input")
 
 class InformationChart(tk.Canvas):
     def __init__(self,root,Df,controller):

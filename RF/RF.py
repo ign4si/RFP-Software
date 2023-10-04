@@ -134,7 +134,7 @@ class Workspace(Windows):
         self.controlcanvas.add_object(Baseline)
         self.controlcanvas.move(-xsep,ysep)
 
-        BaselineSweep=Entries(self.controlcanvas,["baseline_file","baseline_sweep","baseline_shift"],["file","sweep","shift"],[int,int,float],spec_func=lambda:[self.add_baseline(),self.smooth_data()])
+        BaselineSweep=Entries(self.controlcanvas,["baseline_sweep","baseline_shift"],["sweep","shift"],[int,int,float],spec_func=lambda:[self.add_baseline(),self.smooth_data()])
         self.controlcanvas.add_object(BaselineSweep)
         self.controlcanvas.move(xsep,0)
 
@@ -160,6 +160,10 @@ class Workspace(Windows):
                 try:
                     if line[1]=="None":
                         dicparameters[line[0]]=None
+                    elif line[1]=="True":
+                        dicparameters[line[0]]=True
+                    elif line[1]=="False":
+                        dicparameters[line[0]]=False
                     else:
                         dicparameters[line[0]]=line[1]
                 except:
@@ -220,22 +224,22 @@ class Workspace(Windows):
             self.parameters["sweep_end"]=-1
             self.parameters["sweep_step"]=1
     def load_baseline(self):
-        self.parameters["baseline_folder"]=self.select_folder()
-        if self.parameters["baseline_folder"]!=None:
+        self.parameters["baseline_file"]=self.select_file()
+        if self.parameters["baseline_file"]!=None:
             try:
-                self.Baseline=edf.Data(self.parameters["baseline_folder"],verbose=True)
+                self.Baseline=edf.Data(self.parameters["baseline_file"],verbose=True)
             except:
                 print("Baseline not loaded")
     def add_baseline(self):
-        baseline_sweep=[int(self.parameters["baseline_file"]),int(self.parameters["baseline_sweep"]),float(self.parameters["baseline_shift"])]
-        file=int(self.parameters["file"])
-        if self.parameters["baseline_folder"]!=None and self.parameters["baseline_folder"]!="":
-            self.Baseline_amplitude_DB=self.Baseline.S21_DB[baseline_sweep[0]][baseline_sweep[1]]
-            self.Baseline_phase=self.Baseline.phase[baseline_sweep[0]][baseline_sweep[1]]
+        baseline_sweep=[int(self.parameters["baseline_sweep"]),float(self.parameters["baseline_shift"])]
+        if self.parameters["baseline_file"]!=None and self.parameters["baseline_file"]!="":
+            self.Baseline_amplitude_DB=self.Baseline.S21_DB[baseline_sweep[0]]
+            self.Baseline_phase=self.Baseline.phase[baseline_sweep[0]]
         else:
-            self.Baseline_amplitude_DB=np.zeros(len(self.Data.freq[0][0]))
-            self.Baseline_phase=np.zeros(len(self.Data.freq[0][0]))
-        self.amplitude_DB=np.array([self.Data.S21_DB[i]-self.Baseline_amplitude_DB+baseline_sweep[2] for i in range(len(self.Data.S21_DB))])
+            self.Baseline_amplitude_DB=np.zeros(len(self.Data.freq[0]))
+            self.Baseline_phase=np.zeros(len(self.Data.freq[0]))
+        self.amplitude_DB=np.array([self.Data.S21_DB[i]-self.Baseline_amplitude_DB+baseline_sweep[1] for i in range(len(self.Data.S21_DB))])
+        
         self.phase=np.array([self.Data.phase[i]-self.Baseline_phase for i in range(len(self.Data.phase))])
         self.amplitude=np.power(10,self.amplitude_DB/20)
         hola=1j*self.phase
@@ -439,6 +443,7 @@ class Workspace(Windows):
         self.xmin_list=[]
         self.xmax_list=[]
         guessdelay=bool(self.parameters["guessdelay"])
+        print(guessdelay)
         for i in range(sweep_list[0],sweep_list[1],sweep_list[2]):
             xmin,xmax=self.a.get_xlim()
             cond=np.logical_and(self.freq[i]>xmin*1e9,self.freq[i]<xmax*1e9)
