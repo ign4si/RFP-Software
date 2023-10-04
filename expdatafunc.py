@@ -9,17 +9,17 @@ class Data:
     def __init__(self,path,data_type=None,freq_column=None,verbose=False):
         if data_type==None:
             Data,number_of_points_list,number_of_simus_list,number_of_files=TakeDataNew(path,verbose=verbose)
-            self.temp=Data[:,0]
-            self.power=Data[:,1]
-            self.bandwidth=Data[:,2]
-            self.bx=Data[:,3]
-            self.by=Data[:,4]
-            self.bz=Data[:,5]
-            self.freq=Data[:,6]
-            self.real=Data[:,7]
-            self.imag=Data[:,8]
-            self.S21_DB=Data[:,9]
-            self.phase=Data[:,10]
+            self.temp=Data[0]
+            self.power=Data[1]
+            self.bandwidth=Data[2]
+            self.bx=Data[3]
+            self.by=Data[4]
+            self.bz=Data[5]
+            self.freq=Data[6]
+            self.real=Data[7]
+            self.imag=Data[8]
+            self.S21_DB=Data[9]
+            self.phase=Data[10]
             self.number_of_simus=number_of_simus_list
             self.number_of_points=number_of_points_list
             self.number_of_files=number_of_files
@@ -94,7 +94,6 @@ def TakeDataNew(path,verbose=False):
             index_list.append(headings[0].index(labels[i]))
         except:
             index_list.append(None)
-    files_list=[]
     columns_list=[]#same labelling as the labels list
 
     number_of_points_list=[]
@@ -116,15 +115,13 @@ def TakeDataNew(path,verbose=False):
         for i in range(len(labels)):
             if index_list[i]!=None:
                 columns_list[i]=columns_list[i].reshape(number_of_simus,number_of_points)
-        files_list.append(columns_list)
         number_of_points_list.append(number_of_points)
         number_of_simus_list.append(number_of_simus)
-    files_list=np.array(files_list,dtype=np.ndarray)
     number_of_points_list=np.array(number_of_points_list)
     number_of_simus_list=np.array(number_of_simus_list)
     
     
-    return files_list,number_of_points_list,number_of_simus_list,number_of_files
+    return columns_list,number_of_points_list,number_of_simus_list,number_of_files
 def TakeDataCW(path):
     data=ReadFiles(path,sort=False)
     time_list=[]

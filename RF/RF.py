@@ -13,7 +13,7 @@ from resonator_tools import circuit
 import numpy as np
 from Classes.windows import Windows
 from Classes.canvas import ControlCanvas,InformationChart
-from Classes.buttonsandentries import Switchs,Entries,Navigator,RadioButtons,FunctionButtons
+from Classes.buttonsandentries import Switchs,Entries,Navigator,FunctionButtons
 from Classes.toplevels import plotWindow,ColorPlot,fitWindow,OnePointFitWindow,CutWindow
 from Classes.dataframe import SweepsDataframe,NumberDataframe
 
@@ -168,21 +168,53 @@ class Workspace(Windows):
 
     def load_data(self,reset=True):
         self.Data=edf.Data(self.filename)
-        file=int(self.parameters["file"])
-        self.temp=self.Data.temp[file]
-        self.power=self.Data.power[file]
-        self.bandwidth=self.Data.bandwidth[file]
-        self.freq=self.Data.freq[file]
-        self.bx=self.Data.bx[file]
-        self.by=self.Data.by[file]
-        self.bz=self.Data.bz[file]
-        self.amplitude_DB=self.Data.S21_DB[file]
-        self.phase=self.Data.phase[file]
-        self.nsimus=self.Data.number_of_simus[file]
-        self.npoints=self.Data.number_of_points[file]
+        try:
+            self.temp=self.Data.temp.astype(np.float64)
+        except:
+            self.temp=self.Data.temp
+        try:
+            self.power=self.Data.power.astype(np.float64)
+        except:
+            self.power=self.Data.power
+        try:    
+            self.bandwidth=self.Data.bandwidth.astype(np.float64)
+        except:
+            self.bandwidth=self.Data.bandwidth
+        try:
+            self.freq=self.Data.freq.astype(np.float64)
+        except:
+            self.freq=self.Data.freq
+        try:
+            self.bx=self.Data.bx.astype(np.float64)
+        except:
+            self.bx=self.Data.bx
+        try:
+            self.by=self.Data.by.astype(np.float64)
+        except:
+            self.by=self.Data.by
+        try:
+            self.bz=self.Data.bz.astype(np.float64)
+        except:
+            self.bz=self.Data.bz
+        try:
+            self.amplitude_DB=self.Data.S21_DB.astype(np.float64)
+        except:
+            self.amplitude_DB=self.Data.S21_DB
+        try:
+            self.phase=self.Data.phase.astype(np.float64)
+        except:
+            self.phase=self.Data.phase
+        self.nsimus=self.Data.number_of_simus
+        self.npoints=self.Data.number_of_points
         self.nfiles=self.Data.number_of_files
-        self.amplitude=self.Data.S21[file]
-        self.amplitude_complex=self.Data.z[file]
+        try:
+            self.amplitude=self.Data.S21.astype(np.float64)
+        except:
+            self.amplitude=self.Data.S21
+        try:
+            self.amplitude_complex=self.Data.z.astype(np.complex128)
+        except:
+            self.amplitude_complex=self.Data.z
         if reset:
             self.parameters["sweep_ini"]=0
             self.parameters["sweep_end"]=-1
@@ -203,8 +235,8 @@ class Workspace(Windows):
         else:
             self.Baseline_amplitude_DB=np.zeros(len(self.Data.freq[0][0]))
             self.Baseline_phase=np.zeros(len(self.Data.freq[0][0]))
-        self.amplitude_DB=np.array([self.Data.S21_DB[file][i]-self.Baseline_amplitude_DB+baseline_sweep[2] for i in range(len(self.Data.S21_DB[file]))])
-        self.phase=np.array([self.Data.phase[file][i]-self.Baseline_phase for i in range(len(self.Data.phase[file]))])
+        self.amplitude_DB=np.array([self.Data.S21_DB[i]-self.Baseline_amplitude_DB+baseline_sweep[2] for i in range(len(self.Data.S21_DB))])
+        self.phase=np.array([self.Data.phase[i]-self.Baseline_phase for i in range(len(self.Data.phase))])
         self.amplitude=np.power(10,self.amplitude_DB/20)
         hola=1j*self.phase
         hola=hola.astype(complex)
@@ -279,7 +311,7 @@ class Workspace(Windows):
         ylabel=self.parameters["ylabel"]        
 
         if sweep_list[1]<0:
-            sweep_list[1]=len(self.Data.freq[file])+sweep_list[1]+1
+            sweep_list[1]=len(self.Data.freq)+sweep_list[1]+1
             self.parameters["sweep_end"]=sweep_list[1]
     
         if self.parameters["colorbar_sweep"]=="T":

@@ -9,7 +9,7 @@ class ButtonsAndEntries:
         self.controller=controller
 
 class Switchs(ButtonsAndEntries):
-    def __init__(self,canvas,parameter,text,spec_func_on=lambda: None,spec_func_off=lambda: None,button_width=50,button_height=20,label_width=50,label_height=30,y_button=20):
+    def __init__(self,canvas,parameter,text,spec_func_on=lambda: None,spec_func_off=lambda: None,button_width=50,button_height=20,label_height=30,y_button=20):
         super().__init__(canvas.controller)
         self.spec_func_on=spec_func_on
         self.spec_func_off=spec_func_off
@@ -17,7 +17,7 @@ class Switchs(ButtonsAndEntries):
         self.button=tk.Button(canvas.root, text="On", command=lambda: self.switch(parameter))
         canvas.create_window(canvas.posx, canvas.posy+y_button,width=button_width,height=button_height,
                                    window=self.button)
-        canvas.create_window(canvas.posx, canvas.posy,width=label_width,height=label_height,
+        canvas.create_window(canvas.posx, canvas.posy,height=label_height,
                                    window=tk.Label(canvas.root, text=text,font=NORM_FONT))
     def switch(self,parameter):
         if self.button.cget("text")=="On":
@@ -32,27 +32,8 @@ class Switchs(ButtonsAndEntries):
         pass
     def submit(self):
         pass
-class RadioButtons(ButtonsAndEntries):
-    def __init__(self,canvas,parameter,possible_values,text,autoscale=False,button_width=50,button_height=20,label_width=50,label_height=30,y_button=20):
-        super().__init__(canvas.controller)
-        self.parameter=parameter
-        self.autoscale=autoscale
-        self.v = tk.StringVar(value=self.controller.parameters[parameter])
-        self.button_list=[]
-        for i in range(len(possible_values)):
-            self.button_list.append(tk.Radiobutton(canvas.root,indicatoron=0,
-                                                   text=possible_values[i], variable=self.v, value=possible_values[i],command=lambda: self.submit(parameter)))
-            canvas.create_window(canvas.posx+i*button_width, canvas.posy+y_button,width=button_width,height=button_height,
-                                      window=self.button_list[i])
-        canvas.create_window(canvas.posx, canvas.posy,width=label_width,height=label_height,
-                                   window=tk.Label(canvas.root, text=text,font=NORM_FONT))
-    def submit(self):
-        self.controller.parameters[self.parameter]=self.v.get()
-    def check_change(self):
-        if self.controller.parameters[self.parameter]!=self.v.get():
-            return True
 class Entries(ButtonsAndEntries):
-    def __init__(self,canvas,parameter_list,labels_list,type_list,autoscale=False,spec_func=lambda: None,button_width=50,button_height=30,label_width=50,label_height=30,y_button=20):
+    def __init__(self,canvas,parameter_list,labels_list,type_list,autoscale=False,spec_func=lambda: None,button_width=60,button_height=30,label_width=60,label_height=30,y_button=20):
         super().__init__(canvas.controller)
         self.spec_func=spec_func
         self.entry_list=[]
@@ -76,7 +57,7 @@ class Entries(ButtonsAndEntries):
             self.controller.parameters[self.parameter_list[i]]=self.type_list[i](self.entry_list[i].get())
         self.spec_func()
 class Navigator(ButtonsAndEntries):
-    def __init__(self,canvas,parameter,possible_values,text,autoscale=False,type=str,button_width=50,button_height=30,label_width=50,label_height=30,entry_width=50,entry_height=50,y_button=20):
+    def __init__(self,canvas,parameter,possible_values,text,autoscale=False,type=str,button_width=60,button_height=30,label_width=60,label_height=30,entry_width=60,entry_height=50,y_button=20):
         super().__init__(canvas.controller)
         self.parameter=parameter
         self.type=type
@@ -113,10 +94,11 @@ class Navigator(ButtonsAndEntries):
     def submit(self):
         self.controller.parameters[self.parameter]=self.type(self.entry.get())
 class FunctionButtons(ButtonsAndEntries):
-    def __init__(self,canvas,func,text,button_width=50,button_height=30):
+    def __init__(self,canvas,func,text,button_height=30):
         super().__init__(canvas.controller)
-        canvas.create_window(canvas.posx, canvas.posy,width=button_width,height=button_height,
-                                   window=tk.Button(canvas.root, text=text, command=func))
+        button=tk.Button(canvas.root, text=text, command=func)
+        canvas.create_window(canvas.posx, canvas.posy,height=button_height,
+                                   window=button)
     def check_change(self):
         pass
     def submit(self):

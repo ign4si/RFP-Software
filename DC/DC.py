@@ -1,6 +1,6 @@
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 import tkinter as tk
-
+from tkinter import ttk
 import matplotlib
 import expdatafunc as edf
 import numpy as np
@@ -34,6 +34,14 @@ class Compensation(Windows):
         self.title=tk.Label(self,text="Compensation",font=LARGE_FONT,bg=HOMEPAGEBG,fg="white")
         self.title.pack(side='top',fill='x',pady=10, padx=10)
         self.compensation_file=self.select_file()
+        self.title = tk.Label(self, text=self.compensation_file, font=LARGE_FONT)
+        self.title.pack(side='top',fill='x',pady=10, padx=10)
+
+        #create the back to home button
+        button1 = ttk.Button(self, text="Back to Home",
+                             command=lambda: self.controller.back_to_start())
+        button1.pack(fill='x',pady=10, padx=10)
+
         self.load_data()
         self.find_min()
         self.leftframe=tk.Frame(self,bg=HOMEPAGEBG)

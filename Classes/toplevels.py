@@ -4,7 +4,7 @@ import numpy as np
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from resonator_tools import circuit
 from Classes.canvas import ControlCanvas,InformationChart
-from Classes.buttonsandentries import Switchs,Entries,RadioButtons,Navigator,FunctionButtons
+from Classes.buttonsandentries import Switchs,Entries,Navigator,FunctionButtons
 from matplotlib.widgets import Cursor
 from Classes.dataframe import ParametersDataframe
 HOMEPAGEBG="#273746"
@@ -344,7 +344,7 @@ class OnePointFitWindow(tk.Toplevel):
         except:
             #pop up a window saying that the fit failed
             print("Fit failed")
-        self.fr_min=self.x[np.argmin(np.abs(self.z[self.cond]))]
+        self.fr_min=self.x[self.cond][np.argmin(np.abs(self.z[self.cond]))]
         self.controller.frmin_fit_list[self.index_crop]=self.fr_min
 
     def plot(self):
