@@ -27,7 +27,7 @@ class ControlCanvas(tk.Canvas):
                 try:
                     object.submit()
                 except:
-                    tk.messagebox.showinfo(title="Error",message="Invalid input")
+                    tk.messagebox.showerror("Submit error", "Invalid input")
                 if object.autoscale:
                     autoscale=1
         try:
@@ -35,7 +35,8 @@ class ControlCanvas(tk.Canvas):
             if autoscale==1:
                 self.controller.autoscale()
         except:
-            tk.messagebox.showinfo(title="Error",message="Invalid input")
+            tk.messagebox.showerror("Plot error", "Invalid input")
+        
 
 class InformationChart(tk.Canvas):
     def __init__(self,root,Df,controller):

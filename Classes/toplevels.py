@@ -16,6 +16,8 @@ COLORMAP_LIST=['Accent', 'Accent_r', 'Blues', 'Blues_r', 'BrBG', 'BrBG_r', 'BuGn
 'jet_r', 'magma', 'magma_r', 'nipy_spectral', 'nipy_spectral_r', 'ocean', 'ocean_r', 'pink', 'pink_r', 'plasma', 'plasma_r', 'prism', 'prism_r', 'rainbow', 'rainbow_r', 'seismic', 'seismic_r', 'spring', 'spring_r', 'summer', 'summer_r', 'tab10', 'tab10_r', 'tab20', 'tab20_r', 'tab20b', 'tab20b_r', 'tab20c', 'tab20c_r', 'terrain', 'terrain_r', 'turbo', 'turbo_r', 'twilight', 'twilight_r', 'twilight_shifted', 'twilight_shifted_r', 'viridis', 'viridis_r', 'winter', 'winter_r']
 LINESTYLE_LIST=['-', '--', '-.', ':', 'None', ' ', '', 'solid', 'dashed', 'dashdot', 'dotted']
 MARKER_LIST=[".",",","o","v","^","<",">","1","2","3","4","8","s","p","P","*","h","H","+","D","d"]
+X_PREFIX_LIST=["","k","M","G","T","P","E","Z","Y"]
+COLORBAR_PREFIX_LIST=["","m","\mu ","n","p","f","a","z","y"]
 class plotWindow(tk.Toplevel):
     def __init__(self,controller):
         tk.Toplevel.__init__(self,controller)
@@ -35,17 +37,17 @@ class plotWindow(tk.Toplevel):
         self.controlcanvas.add_object(Fontsize)
         self.controlcanvas.move(xsep,0)
         
-        PlotLabels=Entries(self.controlcanvas,["xlabel","title"],["xlabel","title"],[str,str])
+        PlotLabels=Entries(self.controlcanvas,["title"],["title"],[str])
         self.controlcanvas.add_object(PlotLabels)
-        self.controlcanvas.move(-xsep,ysep)
+        self.controlcanvas.move(xsep,0)
         
         GridBool=Switchs(self.controlcanvas,"grid_bool","grid",spec_func_on=self.controller.plot,spec_func_off=self.controller.plot)
         self.controlcanvas.add_object(GridBool)
-        self.controlcanvas.move(xsep,0)
+        self.controlcanvas.move(-2*xsep,ysep)
 
         XTicks=Entries(self.controlcanvas,["xticks_ini","xticks_end","xticks_nintervals"],["xticks_ini","xticks_end","xticks_nintervals"],[float,float,int])
         self.controlcanvas.add_object(XTicks)
-        self.controlcanvas.move(-xsep,ysep)
+        self.controlcanvas.move(xsep,0)
 
         YTicks=Entries(self.controlcanvas,["yticks_ini","yticks_end","yticks_nintervals"],["yticks_ini","yticks_end","yticks_nintervals"],[float,float,int])
         self.controlcanvas.add_object(YTicks)
@@ -53,25 +55,27 @@ class plotWindow(tk.Toplevel):
         
         Marker=Navigator(self.controlcanvas,"marker",MARKER_LIST,"marker",type=str)
         self.controlcanvas.add_object(Marker)
-        self.controlcanvas.move(-xsep,ysep)
+        self.controlcanvas.move(-2*xsep,ysep)
         Linestyle=Navigator(self.controlcanvas,"linestyle",LINESTYLE_LIST,"linestyle",type=str)	
         self.controlcanvas.add_object(Linestyle)
         self.controlcanvas.move(xsep,0)
         
         Linewidth=Entries(self.controlcanvas,["linewidth"],["linewidth"],[float])
         self.controlcanvas.add_object(Linewidth)
-        self.controlcanvas.move(-xsep,ysep)
+        self.controlcanvas.move(xsep,0)
         
         TicksIn=Switchs(self.controlcanvas,"ticks_in","ticksin",spec_func_on=self.controller.plot,spec_func_off=self.controller.plot)
         self.controlcanvas.add_object(TicksIn)
-        self.controlcanvas.move(xsep,0)
+        self.controlcanvas.move(-2*xsep,ysep)
         
         XScale=Navigator(self.controlcanvas,"xscale",["linear","log"],"xscale")
         self.controlcanvas.add_object(XScale)
-        self.controlcanvas.move(-xsep,ysep)
+        self.controlcanvas.move(xsep,0)
         
         YScale=Navigator(self.controlcanvas,"yscale",["linear","log"],"yscale") 
         self.controlcanvas.add_object(YScale)
+        self.controlcanvas.move(xsep,0)
+
         self.controlcanvas.pack(side='top',fill='both',expand=True,pady=10, padx=10)
 class ColorPlot(tk.Toplevel):
     def __init__(self,controller):

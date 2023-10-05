@@ -56,17 +56,19 @@ class Entries(ButtonsAndEntries):
         for i in range(len(self.entry_list)):
             if self.type_list[i](self.controller.parameters[self.parameter_list[i]])!=self.type_list[i](self.entry_list[i].get()):
                 return True
+        return False
     def submit(self):
         for i in range(len(self.entry_list)):
             self.controller.parameters[self.parameter_list[i]]=self.type_list[i](self.entry_list[i].get())
         self.spec_func()
 class Navigator(ButtonsAndEntries):
-    def __init__(self,canvas,parameter,possible_values,text,autoscale=False,type=str,button_width=60,button_height=30,label_width=60,label_height=30,entry_width=60,entry_height=50,y_button=20):
+    def __init__(self,canvas,parameter,possible_values,text,autoscale=False,type=str,spec_func=lambda:None,button_width=60,button_height=30,label_width=60,label_height=30,entry_width=60,entry_height=50,y_button=20):
         super().__init__(canvas.controller)
         self.parameter=parameter
         self.type=type
         self.autoscale=autoscale
         self.entry=tk.Entry(canvas.root)
+        self.spec_func=spec_func
         canvas.create_window(canvas.posx, canvas.posy+y_button,width=entry_width,height=entry_height,window=self.entry)
         self.entry.insert(0, self.controller.parameters[parameter])
 
@@ -80,6 +82,8 @@ class Navigator(ButtonsAndEntries):
     def check_change(self):
         if self.type(self.controller.parameters[self.parameter])!=self.type(self.entry.get()):
             return True
+        else:
+            return False
     def previous(self,parameter,possible_values):
         try:
             new_value=possible_values[possible_values.index(self.entry.get())-1]
@@ -97,6 +101,7 @@ class Navigator(ButtonsAndEntries):
         self.entry.insert(0, new_value)
     def submit(self):
         self.controller.parameters[self.parameter]=self.type(self.entry.get())
+        self.spec_func()
 class FunctionButtons(ButtonsAndEntries):
     def __init__(self,canvas,func,text,button_height=30):
         super().__init__(canvas.controller)

@@ -1,14 +1,15 @@
 file 0
 colormap coolwarm
 yplot S21
-xlabel $\mathrm{Frequency(GHz)}$
 xlabel_fontsize 15
 ylabel_fontsize 15
+x_prefix G
 title None
 title_fontsize 15
 colorbar_sweep T
 colorbar_bool True
 colorbar_fontsize 15
+colorbar_prefix 
 xscale linear
 yscale linear
 linewidth 1

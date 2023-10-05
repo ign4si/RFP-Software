@@ -31,7 +31,10 @@ MENU_COLOR="#1B252F"
 
 COLORMAP_LIST=['Accent', 'Accent_r', 'Blues', 'Blues_r', 'BrBG', 'BrBG_r', 'BuGn', 'BuGn_r', 'BuPu', 'BuPu_r', 'CMRmap', 'CMRmap_r', 'Dark2', 'Dark2_r', 'GnBu', 'GnBu_r', 'Greens', 'Greens_r', 'Greys', 'Greys_r', 'OrRd', 'OrRd_r', 'Oranges', 'Oranges_r', 'PRGn', 'PRGn_r', 'Paired', 'Paired_r', 'Pastel1', 'Pastel1_r', 'Pastel2', 'Pastel2_r', 'PiYG', 'PiYG_r', 'PuBu', 'PuBuGn', 'PuBuGn_r', 'PuBu_r', 'PuOr', 'PuOr_r', 'PuRd', 'PuRd_r', 'Purples', 'Purples_r', 'RdBu', 'RdBu_r', 'RdGy', 'RdGy_r', 'RdPu', 'RdPu_r', 'RdYlBu', 'RdYlBu_r', 'RdYlGn', 'RdYlGn_r', 'Reds', 'Reds_r', 'Set1', 'Set1_r', 'Set2', 'Set2_r', 'Set3', 'Set3_r', 'Spectral', 'Spectral_r', 'Wistia', 'Wistia_r', 'YlGn', 'YlGnBu', 'YlGnBu_r', 'YlGn_r', 'YlOrBr', 'YlOrBr_r', 'YlOrRd', 'YlOrRd_r', 'afmhot', 'afmhot_r', 'autumn', 'autumn_r', 'binary', 'binary_r', 'bone', 'bone_r', 'brg', 'brg_r', 'bwr', 'bwr_r', 'cividis', 'cividis_r', 'cool', 'cool_r', 'coolwarm', 'coolwarm_r', 'copper', 'copper_r', 'cubehelix', 'cubehelix_r', 'flag', 'flag_r', 'gist_earth', 'gist_earth_r', 'gist_gray', 'gist_gray_r', 'gist_heat', 'gist_heat_r', 'gist_ncar', 'gist_ncar_r', 'gist_rainbow', 'gist_rainbow_r', 'gist_stern', 'gist_stern_r', 'gist_yarg', 'gist_yarg_r', 'gnuplot', 'gnuplot2', 'gnuplot2_r', 'gnuplot_r', 'gray', 'gray_r', 'hot', 'hot_r', 'hsv', 'hsv_r', 'inferno', 'inferno_r', 'jet', 
 'jet_r', 'magma', 'magma_r', 'nipy_spectral', 'nipy_spectral_r', 'ocean', 'ocean_r', 'pink', 'pink_r', 'plasma', 'plasma_r', 'prism', 'prism_r', 'rainbow', 'rainbow_r', 'seismic', 'seismic_r', 'spring', 'spring_r', 'summer', 'summer_r', 'tab10', 'tab10_r', 'tab20', 'tab20_r', 'tab20b', 'tab20b_r', 'tab20c', 'tab20c_r', 'terrain', 'terrain_r', 'turbo', 'turbo_r', 'twilight', 'twilight_r', 'twilight_shifted', 'twilight_shifted_r', 'viridis', 'viridis_r', 'winter', 'winter_r']
-
+X_PREFIX_LIST=["","k","M","G","T","P","E","Z","Y"]
+COLORBAR_PREFIX_LIST=["","m","\mu ","n","p","f","a","z","y"]
+X_PREFIX_VALUES_LIST=[1,1e3,1e6,1e9,1e12,1e15,1e18,1e21,1e24]
+COLORBAR_PREFIX_VALUES_LIST=[1,1e-3,1e-6,1e-9,1e-12,1e-15,1e-18,1e-21,1e-24]
 
 def smoothfunc(y, box_pts):
     if box_pts==0:
@@ -126,7 +129,7 @@ class Workspace(Windows):
         self.controlcanvas.add_object(PlotParameters)
         self.controlcanvas.move(-xsep,ysep)
 
-        PlotY=Navigator(self.controlcanvas,"yplot",["S21","S21dB","Phase"],"y",autoscale=True)
+        PlotY=Navigator(self.controlcanvas,"yplot",["S21","S21dB","Phase"],"y",autoscale=True,spec_func=lambda: self.set_yticks_none())
         self.controlcanvas.add_object(PlotY)
         self.controlcanvas.move(xsep,0)
 
@@ -149,6 +152,15 @@ class Workspace(Windows):
         Autoscale=FunctionButtons(self.controlcanvas,self.autoscale,"Autoscale")
         self.controlcanvas.add_object(Autoscale)
         self.controlcanvas.move(-xsep,ysep)
+
+        XPrefix=Navigator(self.controlcanvas,"x_prefix",X_PREFIX_LIST,"x prefix",autoscale=True,spec_func=lambda: self.set_xticks_none())
+        self.controlcanvas.add_object(XPrefix)
+        self.controlcanvas.move(xsep,0)
+
+        ColorbarPrefix=Navigator(self.controlcanvas,"colorbar_prefix",COLORBAR_PREFIX_LIST,"colorbar prefix",autoscale=True)
+        self.controlcanvas.add_object(ColorbarPrefix)
+        self.controlcanvas.move(-xsep,ysep)
+
         self.controlcanvas.pack(side='top',fill='both',expand=True)
     def initialize_parameters(self):
         filename="initial_parameters.txt"
@@ -158,7 +170,9 @@ class Workspace(Windows):
             for line in lines:
                 line=line.split()
                 try:
-                    if line[1]=="None":
+                    if len(line)==1:
+                        dicparameters[line[0]]=""
+                    elif line[1]=="None":
                         dicparameters[line[0]]=None
                     elif line[1]=="True":
                         dicparameters[line[0]]=True
@@ -169,7 +183,6 @@ class Workspace(Windows):
                 except:
                     pass
         return dicparameters
-
     def load_data(self,reset=True):
         self.Data=edf.Data(self.filename)
         try:
@@ -264,11 +277,18 @@ class Workspace(Windows):
         self.parameters["xmax"]=xmax
         self.parameters["ymin"]=ymin
         self.parameters["ymax"]=ymax
+    def set_xticks_none(self):
+        self.parameters["xticks_ini"]=None
+        self.parameters["xticks_end"]=None
+        self.parameters["xticks_nintervals"]=None
+    def set_yticks_none(self):
+        self.parameters["yticks_ini"]=None
+        self.parameters["yticks_end"]=None
+        self.parameters["yticks_nintervals"]=None
     def plot(self):
         xscale=self.parameters["xscale"]
         yscale=self.parameters["yscale"]
         shift=float(self.parameters["shift"])
-        xlabel=self.parameters["xlabel"]
         xlabel_fontsize=float(self.parameters["xlabel_fontsize"])
         ylabel_fontsize=float(self.parameters["ylabel_fontsize"])
         title=self.parameters["title"]
@@ -283,7 +303,12 @@ class Workspace(Windows):
         colorbar_fontsize=float(self.parameters["colorbar_fontsize"])
         ticks_fontsize=float(self.parameters["ticks_fontsize"])
         grid_bool=bool(self.parameters["grid_bool"])
-        file=int(self.parameters["file"]) 
+
+        x_prefix=self.parameters["x_prefix"]
+        colorbar_prefix=self.parameters["colorbar_prefix"]
+        x_prefix_value=float(X_PREFIX_VALUES_LIST[X_PREFIX_LIST.index(x_prefix)])
+        colorbar_prefix_value=float(COLORBAR_PREFIX_VALUES_LIST[COLORBAR_PREFIX_LIST.index(colorbar_prefix)])
+
 
         if self.parameters["xticks_ini"]==None:
             xticks=None
@@ -320,54 +345,54 @@ class Workspace(Windows):
     
         if self.parameters["colorbar_sweep"]=="T":
             if isinstance(self.temp,np.ndarray):
-                first_value=self.temp[sweep_list[0]][0]
-                last_value=self.temp[sweep_list[1]-1][0]
-                self.parameters["colorbar_title"]="$\mathrm{T} \mathrm{(K)}$"
+                first_value=self.temp[sweep_list[0]][0]/colorbar_prefix_value
+                last_value=self.temp[sweep_list[1]-1][0]/colorbar_prefix_value
+                self.parameters["colorbar_title"]=fr"$\mathrm{{T}} \mathrm{{({colorbar_prefix}K)}}$"
                 self.itvector=self.temp
             else:
                 first_value=0
                 last_value=0
         elif self.parameters["colorbar_sweep"]=="P":
             if isinstance(self.power,np.ndarray):
-                first_value=self.power[sweep_list[0]][0]
-                last_value=self.power[sweep_list[1]-1][0]
-                self.parameters["colorbar_title"]="$\mathrm{P} \mathrm{(dBm)}$"
+                first_value=self.power[sweep_list[0]][0]/colorbar_prefix_value
+                last_value=self.power[sweep_list[1]-1][0]/colorbar_prefix_value
+                self.parameters["colorbar_title"]=fr"$\mathrm{{P}} \mathrm{{({colorbar_prefix}dBm)}}$"
                 self.itvector=self.power
             else:
                 first_value=0
                 last_value=0
         elif self.parameters["colorbar_sweep"]=="B":
             if isinstance(self.bandwidth,np.ndarray):
-                first_value=self.bandwidth[sweep_list[0]][0]
-                last_value=self.bandwidth[sweep_list[1]-1][0]
-                self.parameters["colorbar_title"]="$\mathrm{B} \mathrm{(Hz)}$"
+                first_value=self.bandwidth[sweep_list[0]][0]/colorbar_prefix_value
+                last_value=self.bandwidth[sweep_list[1]-1][0]/colorbar_prefix_value
+                self.parameters["colorbar_title"]=fr"$\mathrm{{B}} \mathrm{{({colorbar_prefix}Hz)}}$"
                 self.itvector=self.bandwidth
             else:
                 first_value=0
                 last_value=0
         elif self.parameters["colorbar_sweep"]=="Bx":
             if isinstance(self.bx,np.ndarray):
-                first_value=self.bx[sweep_list[0]][0]
-                last_value=self.bx[sweep_list[1]-1][0]
-                self.parameters["colorbar_title"]="$\mathrm{B}_\mathrm{x}$ $\mathrm{(T)}$"
+                first_value=self.bx[sweep_list[0]][0]/colorbar_prefix_value
+                last_value=self.bx[sweep_list[1]-1][0]/colorbar_prefix_value
+                self.parameters["colorbar_title"]=fr"$\mathrm{{B}}_\mathrm{{x}} \mathrm{{({colorbar_prefix}T)}}$"
                 self.itvector=self.bx
             else:
                 first_value=0
                 last_value=0
         elif self.parameters["colorbar_sweep"]=="By":
             if isinstance(self.by,np.ndarray):
-                first_value=self.by[sweep_list[0]][0]
-                last_value=self.by[sweep_list[1]-1][0]
-                self.parameters["colorbar_title"]="$\mathrm{B}_\mathrm{y}$ $\mathrm{(T)}$"
+                first_value=self.by[sweep_list[0]][0]/colorbar_prefix_value
+                last_value=self.by[sweep_list[1]-1][0]/colorbar_prefix_value
+                self.parameters["colorbar_title"]=fr"$\mathrm{{B}}_\mathrm{{x}} \mathrm{{({colorbar_prefix}T)}}$"
                 self.itvector=self.by
             else:
                 first_value=0
                 last_value=0
         elif self.parameters["colorbar_sweep"]=="Bz":
             if isinstance(self.bz,np.ndarray):
-                first_value=self.bz[sweep_list[0]][0]
-                last_value=self.bz[sweep_list[1]-1][0]
-                self.parameters["colorbar_title"]="$\mathrm{B}_\mathrm{z}$ $\mathrm{(T)}$"
+                first_value=self.bz[sweep_list[0]][0]/colorbar_prefix_value
+                last_value=self.bz[sweep_list[1]-1][0]/colorbar_prefix_value
+                self.parameters["colorbar_title"]=fr"$\mathrm{{B}}_\mathrm{{z}} \mathrm{{({colorbar_prefix}T)}}$"
                 self.itvector=self.bz
             else:
                 first_value=0
@@ -376,9 +401,9 @@ class Workspace(Windows):
 
         for j in range(sweep_list[0],sweep_list[1],sweep_list[2]):
             if last_value==first_value:
-                self.a.plot(self.freq[j]/1e9, self.yplot[j]+shift*j,color=cmap(j/sweep_list[1]),marker=marker,linewidth=linewidth,linestyle=linestyle,markersize=markersize)
+                self.a.plot(self.freq[j]/x_prefix_value, self.yplot[j]+shift*j,color=cmap(j/sweep_list[1]),marker=marker,linewidth=linewidth,linestyle=linestyle,markersize=markersize)
             else:
-                self.a.plot(self.freq[j]/1e9, self.yplot[j]+shift*j,color=cmap((self.itvector[j][0]-first_value)/(last_value-first_value)),marker=marker,linewidth=linewidth,linestyle=linestyle,markersize=markersize)
+                self.a.plot(self.freq[j]/x_prefix_value, self.yplot[j]+shift*j,color=cmap((self.itvector[j][0]/colorbar_prefix_value-first_value)/(last_value-first_value)),marker=marker,linewidth=linewidth,linestyle=linestyle,markersize=markersize)
         
         self.sm = matplotlib.pyplot.cm.ScalarMappable(cmap=cmap, norm=matplotlib.pyplot.Normalize(vmin=first_value, vmax=last_value))
         if colorbar_bool:
@@ -388,7 +413,9 @@ class Workspace(Windows):
                 self.cbar=None
         else:
             self.cbar=None
-        #put latex labels 
+        #put latex labels
+        xlabel=fr"$\mathrm{{Frequency}} \mathrm{{({x_prefix}Hz)}}$"
+        self.parameters["xlabel"]=xlabel
         self.a.set_xlabel(xlabel,fontsize=xlabel_fontsize)
         self.a.set_ylabel(ylabel,fontsize=ylabel_fontsize)
         self.a.set_title(title,fontsize=title_fontsize)
@@ -400,12 +427,23 @@ class Workspace(Windows):
             self.cbar.ax.tick_params(labelsize=ticks_fontsize)
         #put the grid
         self.a.grid(grid_bool)
+        x0, x1 = self.a.get_xlim()
+        y0,y1=self.a.get_ylim()
+        x_visible_ticks = [t for t in self.a.get_xticks() if t>=x0 and t<=x1]
+        y_visible_ticks = [t for t in self.a.get_yticks() if t>=y0 and t<=y1]
+        
+
+        
         if isinstance(xticks,type(None)):
-            pass
+            self.parameters["xticks_ini"]=x_visible_ticks[0]
+            self.parameters["xticks_end"]=x_visible_ticks[-1]
+            self.parameters["xticks_nintervals"]=len(x_visible_ticks)
         else:
             self.a.set_xticks(xticks)
         if isinstance(yticks,type(None)):
-            pass
+            self.parameters["yticks_ini"]=y_visible_ticks[0]
+            self.parameters["yticks_end"]=y_visible_ticks[-1]
+            self.parameters["yticks_nintervals"]=len(y_visible_ticks)
         else:
             self.a.set_yticks(yticks)
         self.a.tick_params(axis='both', labelsize=ticks_fontsize)        
@@ -420,6 +458,9 @@ class Workspace(Windows):
             self.a.set_ylim([float(self.parameters["ymin"]),float(self.parameters["ymax"])])
         else:
             self.save_limits()
+
+
+
         self.canvas.draw()
 
 
@@ -443,7 +484,6 @@ class Workspace(Windows):
         self.xmin_list=[]
         self.xmax_list=[]
         guessdelay=bool(self.parameters["guessdelay"])
-        print(guessdelay)
         for i in range(sweep_list[0],sweep_list[1],sweep_list[2]):
             xmin,xmax=self.a.get_xlim()
             cond=np.logical_and(self.freq[i]>xmin*1e9,self.freq[i]<xmax*1e9)
