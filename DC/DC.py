@@ -15,12 +15,19 @@ SIZE_X=1280
 
 HOMEPAGEBG="#273746"
 MENU_COLOR="#1B252F"
-
+     
+     
 def find_min(x,y,window_size=10):
             min_index=np.argmin(y)
             #make a second order polynomial fit around the minimum and find the minimum of the fit
-            x=x[min_index-window_size:min_index+window_size]
-            y=y[min_index-window_size:min_index+window_size]
+            start_=min_index-window_size
+            end_=min_index+window_size
+            if min_index-window_size<0:
+                start_=0
+            if min_index+window_size>len(x):
+                end_=len(x)
+            x=x[start_:end_]
+            y=y[start_:end_]
             fit=np.polyfit(x,y,2)
             xmin=-fit[1]/(2*fit[0])
             ymin=fit[0]*xmin**2+fit[1]*xmin+fit[2]

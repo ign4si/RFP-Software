@@ -18,6 +18,8 @@ LINESTYLE_LIST=['-', '--', '-.', ':', 'None', ' ', '', 'solid', 'dashed', 'dashd
 MARKER_LIST=[".",",","o","v","^","<",">","1","2","3","4","8","s","p","P","*","h","H","+","D","d"]
 X_PREFIX_LIST=["","k","M","G","T","P","E","Z","Y"]
 COLORBAR_PREFIX_LIST=["","m","\mu ","n","p","f","a","z","y"]
+X_PREFIX_VALUES_LIST=[1,1e3,1e6,1e9,1e12,1e15,1e18,1e21,1e24]
+COLORBAR_PREFIX_VALUES_LIST=[1,1e-3,1e-6,1e-9,1e-12,1e-15,1e-18,1e-21,1e-24]
 class plotWindow(tk.Toplevel):
     def __init__(self,controller):
         tk.Toplevel.__init__(self,controller)
@@ -238,7 +240,7 @@ class fitWindow(tk.Toplevel):
         self.ax3.clear()
 
         sweep_list=[int(self.controller.parameters["sweep_ini"]),int(self.controller.parameters["sweep_end"]),int(self.controller.parameters["sweep_step"])]
-        fw_ylabel_1=self.controller.parameters["fw_ylabel_1"]
+        fw_ylabel_1=self.controller.parameters["xlabel"]
         fw_ylabel_2=self.controller.parameters["fw_ylabel_2"]
         fw_ylabel_3=self.controller.parameters["fw_ylabel_3"]
         fw_xlabel=self.controller.parameters["colorbar_title"]
@@ -247,9 +249,15 @@ class fitWindow(tk.Toplevel):
         fw_xlabel_fontsize=self.controller.parameters["fw_xlabel_fontsize"]
         fw_ylabel_fontsize=self.controller.parameters["fw_ylabel_fontsize"]
         fw_suptitle_fontsize=self.controller.parameters["fw_title_fontsize"]
-        self.ax1.plot(self.controller.itvector[sweep_list[0]:sweep_list[1]:sweep_list[2],0],np.array(self.controller.frmin_fit_list)/1e9,'o',color='black')
-        self.ax2.errorbar(self.controller.itvector[sweep_list[0]:sweep_list[1]:sweep_list[2],0],self.controller.Qi_fit_list,yerr=self.controller.Qi_err_fit_list,fmt='o',color='black')
-        self.ax3.errorbar(self.controller.itvector[sweep_list[0]:sweep_list[1]:sweep_list[2],0],self.controller.Qc_fit_list,yerr=self.controller.Qc_err_fit_list,fmt='o',color='black')
+
+        x_prefix=self.controller.parameters["x_prefix"]
+        colorbar_prefix=self.controller.parameters["colorbar_prefix"]
+        x_prefix_value=float(X_PREFIX_VALUES_LIST[X_PREFIX_LIST.index(x_prefix)])
+        colorbar_prefix_value=float(COLORBAR_PREFIX_VALUES_LIST[COLORBAR_PREFIX_LIST.index(colorbar_prefix)])
+
+        self.ax1.plot(self.controller.itvector[sweep_list[0]:sweep_list[1]:sweep_list[2],0]/colorbar_prefix_value,np.array(self.controller.frmin_fit_list)/x_prefix_value,'o',color='black')
+        self.ax2.errorbar(self.controller.itvector[sweep_list[0]:sweep_list[1]:sweep_list[2],0]/colorbar_prefix_value,self.controller.Qi_fit_list,yerr=self.controller.Qi_err_fit_list,fmt='o',color='black')
+        self.ax3.errorbar(self.controller.itvector[sweep_list[0]:sweep_list[1]:sweep_list[2],0]/colorbar_prefix_value,self.controller.Qc_fit_list,yerr=self.controller.Qc_err_fit_list,fmt='o',color='black')
         self.ax1.set_xlabel(fw_xlabel,fontsize=fw_xlabel_fontsize)
         self.ax1.set_ylabel(fw_ylabel_1,fontsize=fw_ylabel_fontsize)
         self.ax2.set_xlabel(fw_xlabel,fontsize=fw_xlabel_fontsize)

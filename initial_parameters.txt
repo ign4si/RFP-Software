@@ -1,5 +1,6 @@
 file 0
 colormap coolwarm
+fit_range automatic
 yplot S21
 xlabel_fontsize 15
 ylabel_fontsize 15

@@ -42,6 +42,26 @@ def smoothfunc(y, box_pts):
     box = np.ones(box_pts)/box_pts
     y_smooth = np.convolve(y, box, mode='same')
     return y_smooth
+def find_resonance_range(x,y,tolerance=0.1):
+    #find the minimum of the data
+    xmin=x[np.argmin(y)]
+    xinitial=x[0]
+    xfinal=x[-1]
+    #find the value to the left of the minimum where the derivative absolute value is bigger than tolerance
+    for i in range(len(x)):
+        if x[i]<xmin:
+            if abs((y[i]-y[i-1])/(x[i]-x[i-1]))>tolerance:
+                xinitial=x[i]
+                break
+
+    #find the value to the right of the minimum where the derivative absolute value is bigger than tolerance
+    for i in range(len(x)):
+        if x[i]>xmin:
+            if abs((y[i]-y[i-1])/(x[i]-x[i-1]))>tolerance:
+                xfinal=x[i]
+                break
+    return xinitial,xfinal  
+
 class Workspace(Windows):
     def __init__(self, parent,controller):
         tk.Frame.__init__(self, parent)
@@ -160,6 +180,10 @@ class Workspace(Windows):
         ColorbarPrefix=Navigator(self.controlcanvas,"colorbar_prefix",COLORBAR_PREFIX_LIST,"colorbar prefix",autoscale=True)
         self.controlcanvas.add_object(ColorbarPrefix)
         self.controlcanvas.move(-xsep,ysep)
+
+        FitMode=Navigator(self.controlcanvas,"fit_range",["all the screen","automatic"],"fit mode")
+        self.controlcanvas.add_object(FitMode)
+        self.controlcanvas.move(xsep,0)
 
         self.controlcanvas.pack(side='top',fill='both',expand=True)
     def initialize_parameters(self):
@@ -471,6 +495,7 @@ class Workspace(Windows):
         self.a.autoscale()
         self.canvas.draw()
     def fit(self):
+        fit_range=self.parameters["fit_range"]
         sweep_list=[int(self.parameters["sweep_ini"]),int(self.parameters["sweep_end"]),int(self.parameters["sweep_step"])]
 
         self.temp_fit_list=[]
@@ -487,10 +512,18 @@ class Workspace(Windows):
         self.xmax_list=[]
         guessdelay=bool(self.parameters["guessdelay"])
         for i in range(sweep_list[0],sweep_list[1],sweep_list[2]):
-            xmin,xmax=self.a.get_xlim()
-            cond=np.logical_and(self.freq[i]>xmin*1e9,self.freq[i]<xmax*1e9)
-            self.xmin_list.append(xmin*1e9)
-            self.xmax_list.append(xmax*1e9)
+            if fit_range=="all in screen":
+                xmin,xmax=self.a.get_xlim()
+                x_prefix=self.parameters["x_prefix"]
+                x_prefix_value=float(X_PREFIX_VALUES_LIST[X_PREFIX_LIST.index(x_prefix)])
+                cond=np.logical_and(self.freq[i]>xmin*x_prefix_value,self.freq[i]<xmax*x_prefix_value)
+                self.xmin_list.append(xmin*x_prefix_value)
+                self.xmax_list.append(xmax*x_prefix_value)
+            elif fit_range=="automatic":
+                xmin,xmax=find_resonance_range(self.freq[i],self.amplitude[i])
+                cond=np.logical_and(self.freq[i]>xmin,self.freq[i]<xmax)
+                self.xmin_list.append(xmin)
+                self.xmax_list.append(xmax)
             freq_crop=self.freq[i][cond]
             amplitude_complex_crop=self.amplitude_complex[i][cond]
             port1=circuit.notch_port(freq_crop,amplitude_complex_crop)
