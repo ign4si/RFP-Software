@@ -232,6 +232,8 @@ class Workspace(Windows):
             self.amplitude_complex=self.Data.z.astype(np.complex128)
         except:
             self.amplitude_complex=self.Data.z
+        self.amplitude=np.array(self.amplitude)
+        self.amplitude_complex=np.array(self.amplitude_complex)
         if reset:
             self.parameters["sweep_ini"]=0
             self.parameters["sweep_end"]=-1
