@@ -9,7 +9,7 @@ class ButtonsAndEntries:
         self.controller=controller
 
 class Switchs(ButtonsAndEntries):
-    def __init__(self,canvas,parameter,text,spec_func_on=lambda: None,spec_func_off=lambda: None,button_width=50,button_height=20,label_height=30,y_button=20):
+    def __init__(self,canvas,parameter,text,spec_func_on=lambda: None,spec_func_off=lambda: None,label_width=70,button_width=70,button_height=20,label_height=30,y_button=20):
         super().__init__(canvas.controller)
         self.spec_func_on=spec_func_on
         self.spec_func_off=spec_func_off
@@ -21,7 +21,7 @@ class Switchs(ButtonsAndEntries):
         self.button=tk.Button(canvas.root, text=btext, command=lambda: self.switch(parameter))
         canvas.create_window(canvas.posx, canvas.posy+y_button,width=button_width,height=button_height,
                                    window=self.button)
-        canvas.create_window(canvas.posx, canvas.posy,height=label_height,
+        canvas.create_window(canvas.posx, canvas.posy,height=label_height,width=label_width,
                                    window=tk.Label(canvas.root, text=text,font=NORM_FONT))
     def switch(self,parameter):
         if self.button.cget("text")=="On":
@@ -37,7 +37,7 @@ class Switchs(ButtonsAndEntries):
     def submit(self):
         pass
 class Entries(ButtonsAndEntries):
-    def __init__(self,canvas,parameter_list,labels_list,type_list,autoscale=False,spec_func=lambda: None,button_width=60,button_height=30,label_width=60,label_height=30,y_button=20):
+    def __init__(self,canvas,parameter_list,labels_list,type_list,autoscale=False,spec_func=lambda: None,button_width=70,button_height=30,label_width=70,label_height=30,y_button=20):
         super().__init__(canvas.controller)
         self.spec_func=spec_func
         self.entry_list=[]
@@ -62,7 +62,7 @@ class Entries(ButtonsAndEntries):
             self.controller.parameters[self.parameter_list[i]]=self.type_list[i](self.entry_list[i].get())
         self.spec_func()
 class Navigator(ButtonsAndEntries):
-    def __init__(self,canvas,parameter,possible_values,text,autoscale=False,type=str,spec_func=lambda:None,button_width=60,button_height=30,label_width=60,label_height=30,entry_width=60,entry_height=50,y_button=20):
+    def __init__(self,canvas,parameter,possible_values,text,autoscale=False,type=str,spec_func=lambda:None,button_width=80,button_height=30,label_width=80,label_height=30,entry_width=80,entry_height=50,y_button=20):
         super().__init__(canvas.controller)
         self.parameter=parameter
         self.type=type

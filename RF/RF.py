@@ -61,6 +61,15 @@ def find_resonance_range(x,y,tolerance=0.1):
                 xfinal=x[i]
                 break
     return xinitial,xfinal  
+def find_resonance_range_2(x,y):
+    xmiddle=(np.min(y)+np.max(y))/2
+    idx = np.argwhere(np.diff(np.sign(y - xmiddle))).flatten()
+    resonance_width=x[idx[1]]-x[idx[0]]
+    xmin=x[np.argmin(y)]-3*resonance_width
+    xmax=x[np.argmin(y)]+3*resonance_width
+    return xmin,xmax
+
+
 
 class Workspace(Windows):
     def __init__(self, parent,controller):
@@ -181,9 +190,14 @@ class Workspace(Windows):
         self.controlcanvas.add_object(ColorbarPrefix)
         self.controlcanvas.move(-xsep,ysep)
 
-        FitMode=Navigator(self.controlcanvas,"fit_range",["all the screen","automatic"],"fit mode")
+        FitMode=Navigator(self.controlcanvas,"fit_range",["all the screen","automatic","automatic 2"],"fit mode")
         self.controlcanvas.add_object(FitMode)
         self.controlcanvas.move(xsep,0)
+
+        FitTolerance=Entries(self.controlcanvas,["fit_tolerance"],["tolerance (automatic mode)"],[float])
+        self.controlcanvas.add_object(FitTolerance)
+        self.controlcanvas.move(-xsep,ysep)
+
 
         self.controlcanvas.pack(side='top',fill='both',expand=True)
     def initialize_parameters(self):
@@ -335,16 +349,6 @@ class Workspace(Windows):
         x_prefix_value=float(X_PREFIX_VALUES_LIST[X_PREFIX_LIST.index(x_prefix)])
         colorbar_prefix_value=float(COLORBAR_PREFIX_VALUES_LIST[COLORBAR_PREFIX_LIST.index(colorbar_prefix)])
 
-
-        if self.parameters["xticks_ini"]==None:
-            xticks=None
-        else:
-            xticks=np.linspace(float(self.parameters["xticks_ini"]),float(self.parameters["xticks_end"]),int(self.parameters["xticks_nintervals"]))
-        if self.parameters["yticks_ini"]==None:
-            yticks=None
-        else:
-            yticks=np.linspace(float(self.parameters["yticks_ini"]),float(self.parameters["yticks_end"]),int(self.parameters["yticks_nintervals"]))
-
         cmap=matplotlib.pyplot.get_cmap(self.parameters["colormap"])
         if self.parameters["xmin"]!=None and self.parameters["xmax"]!=None and self.parameters["ymin"]!=None and self.parameters["ymax"]!=None:
             self.save_limits()
@@ -459,19 +463,6 @@ class Workspace(Windows):
         y_visible_ticks = [t for t in self.a.get_yticks() if t>=y0 and t<=y1]
         
 
-        
-        if isinstance(xticks,type(None)):
-            self.parameters["xticks_ini"]=x_visible_ticks[0]
-            self.parameters["xticks_end"]=x_visible_ticks[-1]
-            self.parameters["xticks_nintervals"]=len(x_visible_ticks)
-        else:
-            self.a.set_xticks(xticks)
-        if isinstance(yticks,type(None)):
-            self.parameters["yticks_ini"]=y_visible_ticks[0]
-            self.parameters["yticks_end"]=y_visible_ticks[-1]
-            self.parameters["yticks_nintervals"]=len(y_visible_ticks)
-        else:
-            self.a.set_yticks(yticks)
         self.a.tick_params(axis='both', labelsize=ticks_fontsize)        
         if ticksin:
             self.a.tick_params(direction='in')
@@ -520,10 +511,16 @@ class Workspace(Windows):
                 self.xmin_list.append(xmin*x_prefix_value)
                 self.xmax_list.append(xmax*x_prefix_value)
             elif fit_range=="automatic":
-                xmin,xmax=find_resonance_range(self.freq[i],self.amplitude[i])
+                xmin,xmax=find_resonance_range(self.freq[i],self.amplitude[i],tolerance=float(self.parameters["fit_tolerance"]))
                 cond=np.logical_and(self.freq[i]>xmin,self.freq[i]<xmax)
                 self.xmin_list.append(xmin)
                 self.xmax_list.append(xmax)
+            elif fit_range=="automatic 2":
+                xmin,xmax=find_resonance_range_2(self.freq[i],self.amplitude[i])
+                cond=np.logical_and(self.freq[i]>xmin,self.freq[i]<xmax)
+                self.xmin_list.append(xmin)
+                self.xmax_list.append(xmax)
+
             freq_crop=self.freq[i][cond]
             amplitude_complex_crop=self.amplitude_complex[i][cond]
             port1=circuit.notch_port(freq_crop,amplitude_complex_crop)

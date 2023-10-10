@@ -47,28 +47,23 @@ class plotWindow(tk.Toplevel):
         self.controlcanvas.add_object(GridBool)
         self.controlcanvas.move(-2*xsep,ysep)
 
-        XTicks=Entries(self.controlcanvas,["xticks_ini","xticks_end","xticks_nintervals"],["xticks_ini","xticks_end","xticks_nintervals"],[float,float,int])
-        self.controlcanvas.add_object(XTicks)
-        self.controlcanvas.move(xsep,0)
-
-        YTicks=Entries(self.controlcanvas,["yticks_ini","yticks_end","yticks_nintervals"],["yticks_ini","yticks_end","yticks_nintervals"],[float,float,int])
-        self.controlcanvas.add_object(YTicks)
-        self.controlcanvas.move(xsep,0)
         
         Marker=Navigator(self.controlcanvas,"marker",MARKER_LIST,"marker",type=str)
         self.controlcanvas.add_object(Marker)
-        self.controlcanvas.move(-2*xsep,ysep)
+        self.controlcanvas.move(xsep,0)
+        
+        
         Linestyle=Navigator(self.controlcanvas,"linestyle",LINESTYLE_LIST,"linestyle",type=str)	
         self.controlcanvas.add_object(Linestyle)
         self.controlcanvas.move(xsep,0)
         
         Linewidth=Entries(self.controlcanvas,["linewidth"],["linewidth"],[float])
         self.controlcanvas.add_object(Linewidth)
-        self.controlcanvas.move(xsep,0)
+        self.controlcanvas.move(-2*xsep,ysep)
         
         TicksIn=Switchs(self.controlcanvas,"ticks_in","ticksin",spec_func_on=self.controller.plot,spec_func_off=self.controller.plot)
         self.controlcanvas.add_object(TicksIn)
-        self.controlcanvas.move(-2*xsep,ysep)
+        self.controlcanvas.move(xsep,0)
         
         XScale=Navigator(self.controlcanvas,"xscale",["linear","log"],"xscale")
         self.controlcanvas.add_object(XScale)
@@ -76,7 +71,7 @@ class plotWindow(tk.Toplevel):
         
         YScale=Navigator(self.controlcanvas,"yscale",["linear","log"],"yscale") 
         self.controlcanvas.add_object(YScale)
-        self.controlcanvas.move(xsep,0)
+        self.controlcanvas.move(-2*xsep,ysep)
 
         self.controlcanvas.pack(side='top',fill='both',expand=True,pady=10, padx=10)
 class ColorPlot(tk.Toplevel):
