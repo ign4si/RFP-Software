@@ -190,7 +190,7 @@ class Workspace(Windows):
         self.controlcanvas.add_object(ColorbarPrefix)
         self.controlcanvas.move(-xsep,ysep)
 
-        FitMode=Navigator(self.controlcanvas,"fit_range",["all the screen","automatic","automatic 2"],"fit mode")
+        FitMode=Navigator(self.controlcanvas,"fit_range",["all in screen","automatic","automatic 2"],"fit mode")
         self.controlcanvas.add_object(FitMode)
         self.controlcanvas.move(xsep,0)
 
