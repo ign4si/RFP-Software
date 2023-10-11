@@ -190,13 +190,10 @@ class Workspace(Windows):
         self.controlcanvas.add_object(ColorbarPrefix)
         self.controlcanvas.move(-xsep,ysep)
 
-        FitMode=Navigator(self.controlcanvas,"fit_range",["all in screen","automatic","automatic 2"],"fit mode")
+        FitMode=Navigator(self.controlcanvas,"fit_range",["all in screen","automatic"],"fit mode")
         self.controlcanvas.add_object(FitMode)
         self.controlcanvas.move(xsep,0)
 
-        FitTolerance=Entries(self.controlcanvas,["fit_tolerance"],["tolerance (automatic mode)"],[float])
-        self.controlcanvas.add_object(FitTolerance)
-        self.controlcanvas.move(-xsep,ysep)
 
 
         self.controlcanvas.pack(side='top',fill='both',expand=True)
@@ -511,11 +508,6 @@ class Workspace(Windows):
                 self.xmin_list.append(xmin*x_prefix_value)
                 self.xmax_list.append(xmax*x_prefix_value)
             elif fit_range=="automatic":
-                xmin,xmax=find_resonance_range(self.freq[i],self.amplitude[i],tolerance=float(self.parameters["fit_tolerance"]))
-                cond=np.logical_and(self.freq[i]>xmin,self.freq[i]<xmax)
-                self.xmin_list.append(xmin)
-                self.xmax_list.append(xmax)
-            elif fit_range=="automatic 2":
                 xmin,xmax=find_resonance_range_2(self.freq[i],self.amplitude[i])
                 cond=np.logical_and(self.freq[i]>xmin,self.freq[i]<xmax)
                 self.xmin_list.append(xmin)
