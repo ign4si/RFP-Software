@@ -47,6 +47,7 @@ def find_resonance_range(x,y,tolerance=0.1):
     xmin=x[np.argmin(y)]
     xinitial=x[0]
     xfinal=x[-1]
+
     #find the value to the left of the minimum where the derivative absolute value is bigger than tolerance
     for i in range(len(x)):
         if x[i]<xmin:
@@ -67,6 +68,19 @@ def find_resonance_range_2(x,y):
     resonance_width=x[idx[1]]-x[idx[0]]
     xmin=x[np.argmin(y)]-3*resonance_width
     xmax=x[np.argmin(y)]+3*resonance_width
+
+    # matplotlib.pyplot.plot(x,y)
+    # matplotlib.pyplot.axvline(x=xmin,color='r')
+    # matplotlib.pyplot.axvline(x=xmax,color='r')
+    # matplotlib.pyplot.axvline(x=x[idx[0]],color='g')
+    # matplotlib.pyplot.axvline(x=x[idx[1]],color='g')
+    # matplotlib.pyplot.axvline(x=x[np.argmin(y)],color='b')
+    # matplotlib.pyplot.axvline(x=x[np.argmin(y)]+resonance_width,color='b',linestyle='--')
+    # matplotlib.pyplot.axvline(x=x[np.argmin(y)]+2*resonance_width,color='b',linestyle='--')
+
+    # matplotlib.pyplot.axhline(y=xmiddle)
+    # matplotlib.pyplot.show()
+
     return xmin,xmax
 
 
@@ -430,7 +444,10 @@ class Workspace(Windows):
             if last_value==first_value:
                 self.a.plot(self.freq[j]/x_prefix_value, self.yplot[j]+shift*j,color=cmap(j/sweep_list[1]),marker=marker,linewidth=linewidth,linestyle=linestyle,markersize=markersize)
             else:
-                self.a.plot(self.freq[j]/x_prefix_value, self.yplot[j]+shift*j,color=cmap((self.itvector[j][0]/colorbar_prefix_value-first_value)/(last_value-first_value)),marker=marker,linewidth=linewidth,linestyle=linestyle,markersize=markersize)
+                if last_value>first_value:
+                    self.a.plot(self.freq[j]/x_prefix_value, self.yplot[j]+shift*j,color=cmap((self.itvector[j][0]/colorbar_prefix_value-first_value)/(last_value-first_value)),marker=marker,linewidth=linewidth,linestyle=linestyle,markersize=markersize)
+                else:
+                    self.a.plot(self.freq[j]/x_prefix_value, self.yplot[j]+shift*j,color=cmap(1-((self.itvector[j][0]/colorbar_prefix_value-first_value)/(last_value-first_value))),marker=marker,linewidth=linewidth,linestyle=linestyle,markersize=markersize)
         
         self.sm = matplotlib.pyplot.cm.ScalarMappable(cmap=cmap, norm=matplotlib.pyplot.Normalize(vmin=first_value, vmax=last_value))
         if colorbar_bool:
