@@ -60,6 +60,8 @@ class Compensation(Windows):
         self.rightframe.pack(side='left',fill='y',expand=True)
         self.fig_main,self.ax_main=matplotlib.pyplot.subplots(figsize=(15,5),dpi=100)
         self.fig_fit,self.ax_fit=matplotlib.pyplot.subplots(figsize=(15,5),dpi=100)
+        self.plot()
+        self.plotfit()
         self.canvas_main=FigureCanvasTkAgg(self.fig_main,self.leftframe)
         self.canvas_main.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=True)
         self.canvas_fit=FigureCanvasTkAgg(self.fig_fit,self.rightframe)
@@ -83,14 +85,14 @@ class Compensation(Windows):
         self.bx=Data.bx
         self.by=Data.by
         self.bz=Data.bz
-        self.xmin_list=[]
-        self.ymin_list=[]
         if isinstance(self.bx,type(None)):
             self.bfield=self.bz
         else:
             self.bfield=self.bx
 
     def find_min(self):
+        self.xmin_list=[]
+        self.ymin_list=[]
         window_size=self.parameters["window_size"]
         for i in range(0,len(self.by),2):
                 xmin_fs,ymin_fs=find_min(self.by[i,:],self.r[i,:],window_size=window_size)
@@ -127,11 +129,11 @@ class Compensation(Windows):
             self.ax_fit.legend(["{}".format(yplot)])
     def create_controlcanvas(self):
         #create the canvas for the buttons
-        self.controlcanvas=ControlCanvas(self,self)
-        WindowSizeEntry=Entries(self.controlcanvas,["window_size"],["window_size"],[int],spec_func=lambda:[self.plot(),self.plotfit(),self.autoscale()])
+        self.controlcanvas=ControlCanvas(self.leftframe,self)
+        WindowSizeEntry=Entries(self.controlcanvas,["window_size"],["window_size"],[int],spec_func=lambda:[self.find_min(),self.plot(),self.plotfit(),self.autoscale()])
         self.controlcanvas.add_object(WindowSizeEntry)
         self.controlcanvas.move(200,0)
-        self.controlcanvas.pack(side='top',fill='both',expand=True)
+        self.controlcanvas.pack(side='bottom',fill='x',expand=False)
     def autoscale(self):
         self.ax_main.autoscale()
         self.ax_fit.autoscale()
