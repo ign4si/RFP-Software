@@ -6,6 +6,8 @@ import expdatafunc as edf
 import numpy as np
 
 from Classes.windows import Windows
+from Classes.canvas import ControlCanvas
+from Classes.buttonsandentries import Entries,FunctionButtons
 LARGE_FONT = ("CMU Serif", 16)
 NORM_FONT = ("CMU Serif", 10)
 SMALL_FONT = ("CMU Serif", 6)
@@ -38,6 +40,7 @@ class Compensation(Windows):
         tk.Frame.__init__(self,parent)
         self.controller=controller
         self.parent=parent
+        self.parameters={"window_size":10}
         self.title=tk.Label(self,text="Compensation",font=LARGE_FONT,bg=HOMEPAGEBG,fg="white")
         self.title.pack(side='top',fill='x',pady=10, padx=10)
         self.compensation_file=self.select_file()
@@ -55,8 +58,8 @@ class Compensation(Windows):
         self.leftframe.pack(side='left',fill='y',expand=True)
         self.rightframe=tk.Frame(self,bg=HOMEPAGEBG)
         self.rightframe.pack(side='left',fill='y',expand=True)
-        self.fig_main,self.ax_main=self.plot()
-        self.fig_fit,self.ax_fit=self.plotfit()
+        self.fig_main,self.ax_main=matplotlib.pyplot.subplots(figsize=(15,5),dpi=100)
+        self.fig_fit,self.ax_fit=matplotlib.pyplot.subplots(figsize=(15,5),dpi=100)
         self.canvas_main=FigureCanvasTkAgg(self.fig_main,self.leftframe)
         self.canvas_main.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=True)
         self.canvas_fit=FigureCanvasTkAgg(self.fig_fit,self.rightframe)
@@ -69,6 +72,8 @@ class Compensation(Windows):
         self.canvas_fit._tkcanvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
         self.canvas_main.draw()
         self.canvas_fit.draw()
+        self.create_controlcanvas()
+        self.bind_all("<Return>",lambda event:[self.controlcanvas.submit_all()])
 
 
     def load_data(self):
@@ -86,39 +91,49 @@ class Compensation(Windows):
             self.bfield=self.bx
 
     def find_min(self):
-        window_size=[20]
+        window_size=self.parameters["window_size"]
         for i in range(0,len(self.by),2):
-                xmin_fs,ymin_fs=find_min(self.by[i,:],self.r[i,:],window_size=window_size[0])
-                xmin_bs,ymin_bs=find_min(self.by[i+1,:],self.r[i+1,:],window_size=window_size[0])
+                xmin_fs,ymin_fs=find_min(self.by[i,:],self.r[i,:],window_size=window_size)
+                xmin_bs,ymin_bs=find_min(self.by[i+1,:],self.r[i+1,:],window_size=window_size)
                 self.xmin_list.append((xmin_fs+xmin_bs)/2)
                 self.ymin_list.append((ymin_fs+ymin_bs)/2)
     def plot(self):
-        fig,ax=matplotlib.pyplot.subplots(figsize=(15,5),dpi=100)
+        self.ax_main.clear()
         cmap=matplotlib.pyplot.get_cmap("viridis")
         for i in range(len(self.by)):
-            ax.plot(self.by[i,:],self.r[i,:] ,color=cmap(i/len(self.by)))
+            self.ax_main.plot(self.by[i,:],self.r[i,:] ,color=cmap(i/len(self.by)))
             if i%2==0:
-                ax.plot(self.xmin_list[i//2],self.ymin_list[i//2],"o",color=cmap(i/len(self.by)))
-        ax.set_xlabel("$\mathrm{B_y} \mathrm{(T)}$")
-        ax.set_ylabel("$\mathrm{R} (\Omega)$")
-        ax.set_title("$\mathrm{Compensation}$")
-        return fig,ax
+                self.ax_main.plot(self.xmin_list[i//2],self.ymin_list[i//2],"o",color=cmap(i/len(self.by)))
+        self.ax_main.set_xlabel("$\mathrm{B_y} \mathrm{(T)}$")
+        self.ax_main.set_ylabel("$\mathrm{R} (\Omega)$")
+        self.ax_main.set_title("$\mathrm{Compensation}$")
+
 
     def plotfit(self):
-        fig,ax=matplotlib.pyplot.subplots(figsize=(15,5),dpi=100)
-        fig.subplots_adjust(left=0.2)
+        self.ax_fit.clear()
         xplot=self.bfield[::2,0]
         yplot=self.xmin_list
-        ax.plot(xplot,yplot,'-o')
+        self.ax_fit.plot(xplot,yplot,'-o')
         if len(yplot)>1:
             fit=np.polyfit(xplot,yplot,1)
-            ax.plot(xplot,fit[0]*xplot+fit[1],"--")
+            self.ax_fit.plot(xplot,fit[0]*xplot+fit[1],"--")
             if isinstance(self.bx,type(None)):
-                ax.set_xlabel("$\mathrm{B_z} \mathrm{(T)}$")
+                self.ax_fit.set_xlabel("$\mathrm{B_z} \mathrm{(T)}$")
             else:
-                ax.set_xlabel("$\mathrm{B_x} \mathrm{(T)}$")
-            ax.set_ylabel("$\mathrm{B_y} \mathrm{(T)}$")
-            ax.legend(["Data","Fit. \nSlope="+str(fit[0])+"\nIntercept="+str(fit[1])+r" $\mathrm{T}$"])
+                self.ax_fit.set_xlabel("$\mathrm{B_x} \mathrm{(T)}$")
+            self.ax_fit.set_ylabel("$\mathrm{B_y} \mathrm{(T)}$")
+            self.ax_fit.legend(["Data","Fit. \nSlope="+str(fit[0])+"\nIntercept="+str(fit[1])+r" $\mathrm{T}$"])
         elif len(yplot)==1:
-            ax.legend(["{}".format(yplot)])
-        return fig,ax
+            self.ax_fit.legend(["{}".format(yplot)])
+    def create_controlcanvas(self):
+        #create the canvas for the buttons
+        self.controlcanvas=ControlCanvas(self,self)
+        WindowSizeEntry=Entries(self.controlcanvas,["window_size"],["window_size"],[int],spec_func=lambda:[self.plot(),self.plotfit(),self.autoscale()])
+        self.controlcanvas.add_object(WindowSizeEntry)
+        self.controlcanvas.move(200,0)
+        self.controlcanvas.pack(side='top',fill='both',expand=True)
+    def autoscale(self):
+        self.ax_main.autoscale()
+        self.ax_fit.autoscale()
+        self.canvas_main.draw()
+        self.canvas_fit.draw()

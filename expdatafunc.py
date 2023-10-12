@@ -86,7 +86,6 @@ def TakeDataNew(path,verbose=False):
     global labels
     data,headings=ReadFiles(path)
     number_of_files=1
-    print(headings)
     #find the index of the labels in the headings
     index_list=[]
     for i in range(len(labels)):
