@@ -251,6 +251,8 @@ class fitWindow(tk.Toplevel):
         colorbar_prefix_value=float(COLORBAR_PREFIX_VALUES_LIST[COLORBAR_PREFIX_LIST.index(colorbar_prefix)])
 
         self.ax1.plot(self.controller.itvector[sweep_list[0]:sweep_list[1]:sweep_list[2],0]/colorbar_prefix_value,np.array(self.controller.frmin_fit_list)/x_prefix_value,'o',color='black')
+        print(self.controller.itvector[sweep_list[0]:sweep_list[1]:sweep_list[2],0]/colorbar_prefix_value)
+        print(self.controller.Qi_err_fit_list)
         self.ax2.errorbar(self.controller.itvector[sweep_list[0]:sweep_list[1]:sweep_list[2],0]/colorbar_prefix_value,self.controller.Qi_fit_list,yerr=self.controller.Qi_err_fit_list,fmt='o',color='black')
         self.ax3.errorbar(self.controller.itvector[sweep_list[0]:sweep_list[1]:sweep_list[2],0]/colorbar_prefix_value,self.controller.Qc_fit_list,yerr=self.controller.Qc_err_fit_list,fmt='o',color='black')
         self.ax1.set_xlabel(fw_xlabel,fontsize=fw_xlabel_fontsize)
@@ -270,6 +272,8 @@ class fitWindow(tk.Toplevel):
         sweep_list=[int(self.controller.parameters["sweep_ini"]),int(self.controller.parameters["sweep_end"]),int(self.controller.parameters["sweep_step"])]
         x=self.controller.itvector[sweep_list[0]:sweep_list[1]:sweep_list[2],0]
         y1=self.controller.frmin_fit_list
+        y1_fit=self.controller.fr_fit_list
+        y1_fit_err=self.controller.fr_err_fit_list
         y2=self.controller.Qi_fit_list
         y3=self.controller.Qc_fit_list
         y2err=self.controller.Qi_err_fit_list
@@ -299,9 +303,9 @@ class fitWindow(tk.Toplevel):
         except:
             bandwidth=np.zeros(len(x))
         with open(filename,'w') as o:
-            print("x\ty1\ty2\ty2err\ty3\ty3err\tbx\tby\tbz\ttemp\tpower\tbandwidth",file=o)
+            print("x\ty1\ty1fit\ty1fit_err\ty2\ty2err\ty3\ty3err\tbx\tby\tbz\ttemp\tpower\tbandwidth",file=o)
             for i in range(len(x)):
-                print(str(x[i])+"\t"+str(y1[i])+"\t"+str(y2[i])+"\t"+str(y2err[i])+"\t"+str(y3[i])+"\t"+str(y3err[i])+"\t"+str(bx[i])+"\t"+str(by[i])+"\t"+str(bz[i])+"\t"+str(temp[i])+"\t"+str(power[i])+"\t"+str(bandwidth[i]),file=o)
+                print(str(x[i])+"\t"+str(y1[i])+"\t"+str(y1_fit[i])+"\t"+str(y1_fit_err[i])+"\t"+str(y2[i])+"\t"+str(y2err[i])+"\t"+str(y3[i])+"\t"+str(y3err[i])+"\t"+str(bx[i])+"\t"+str(by[i])+"\t"+str(bz[i])+"\t"+str(temp[i])+"\t"+str(power[i])+"\t"+str(bandwidth[i]),file=o)
 class OnePointFitWindow(tk.Toplevel):
     def __init__(self,root,index_crop):
         tk.Toplevel.__init__(self,root)

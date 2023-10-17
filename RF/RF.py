@@ -138,7 +138,7 @@ class Workspace(Windows):
         self.controlcanvas=ControlCanvas(self.rightframe,self)
 
         #create the button
-        xsep=260
+        xsep=300
         ysep=70
 
         SweepEntries=Entries(self.controlcanvas,["sweep_ini","sweep_end","sweep_step"],["ini","end","step"],[int,int,int])
@@ -152,7 +152,7 @@ class Workspace(Windows):
         self.controlcanvas.add_object(Colour)
         self.controlcanvas.move(xsep,0)
 
-        Cbar=Switchs(self.controlcanvas,"colorbar_bool","colorbar_bool",spec_func_on=lambda: self.plot(),spec_func_off=lambda: self.plot())
+        Cbar=Switchs(self.controlcanvas,"colorbar_bool","colorbar_bool",spec_func_on=lambda: self.plot(),spec_func_off=lambda: self.plot(),label_width=90,button_width=90)
         self.controlcanvas.add_object(Cbar)
         self.controlcanvas.move(-xsep,ysep)
 
@@ -200,7 +200,7 @@ class Workspace(Windows):
         self.controlcanvas.add_object(XPrefix)
         self.controlcanvas.move(xsep,0)
 
-        ColorbarPrefix=Navigator(self.controlcanvas,"colorbar_prefix",COLORBAR_PREFIX_LIST,"colorbar prefix",autoscale=True)
+        ColorbarPrefix=Navigator(self.controlcanvas,"colorbar_prefix",COLORBAR_PREFIX_LIST,"colorbar prefix",autoscale=True,button_width=90,label_width=90,entry_width=90)
         self.controlcanvas.add_object(ColorbarPrefix)
         self.controlcanvas.move(-xsep,ysep)
 
@@ -377,7 +377,10 @@ class Workspace(Windows):
             self.yplot=self.phase
             self.parameters["ylabel"]="$\mathrm{Phase}$ $\mathrm{(rad)}$"
         if self.cbar!=None:
-            self.cbar.remove()
+            try:
+                self.cbar.remove()
+            except:
+                pass
         ylabel=self.parameters["ylabel"]        
 
         if sweep_list[1]<0:

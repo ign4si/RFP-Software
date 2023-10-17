@@ -51,7 +51,7 @@ class NumberDataframe(Dataframe):
     def __init__(self,root):
         Dataframe.__init__(self,root)
     def update(self):
-        self.df=pd.DataFrame({'Number of Files': [self.root.nfiles],'Number of sweeps': [self.root.nsimus],'Number of points per sweep': [self.root.npoints]})
+        self.df=pd.DataFrame({'Number of sweeps': self.root.nsimus,'Number of points per sweep': self.root.npoints})
 class ParametersDataframe(Dataframe):
     def __init__(self,root):
         Dataframe.__init__(self,root)

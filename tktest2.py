@@ -69,13 +69,14 @@ class MainContainer(tk.Tk):
 
         helpmenu=tk.Menu(menubar,tearoff=0,bg=MENU_COLOR,fg="white")
 
-        # helpmenu.add_command(label="How to read Sonnet files",command=lambda: self.read_pdf("tkinterstuff\SonnetFiles.pdf"))
-        # helpmenu.add_command(label= "How Sonnet data is fitted",command=lambda: self.read_pdf("tkinterstuff\SonnetFitted.pdf"))
+        helpmenu.add_command(label="Sonnet files",command=lambda: self.read_pdf("tkinterstuff\sonnetfiles.pdf"))
+        helpmenu.add_command(label= "RF Measurements",command=lambda: self.read_pdf("tkinterstuff\realdatafiles.pdf"))
+        helpmenu.add_command(label="DC Measurements",command=lambda: self.read_pdf("tkinterstuff\dcfiles.pdf"))
         # helpmenu.add_separator()
         # helpmenu.add_command(label="How to read real data files",command=lambda: self.read_pdf("tkinterstuff\RealDataFiles.pdf"))
         # helpmenu.add_command(label="How real data is fitted",command=lambda: self.read_pdf("tkinterstuff\RealDataFitted.pdf"))
         # helpmenu.add_separator()
-        helpmenu.add_command(label="Contact",command=lambda: tk.messagebox.showinfo(title="Contact",message="Beta 1.1.5\nMSc. I. Lobato \nlobato31415@gmail.com"))
+        helpmenu.add_command(label="Contact",command=lambda: tk.messagebox.showinfo(title="Contact",message="Beta 1.2\nMSc. I. Lobato \nlobato31415@gmail.com"))
         
         menubar.add_cascade(label="Help",menu=helpmenu)
         # telling the program: hey, this is the menu
@@ -108,5 +109,8 @@ class MainContainer(tk.Tk):
         self.destroy()
         app=MainContainer()
         app.mainloop()
+    def read_pdf(self,path):
+        import os
+        os.startfile(path)
 app = MainContainer()
 app.mainloop()
