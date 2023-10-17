@@ -69,9 +69,9 @@ class MainContainer(tk.Tk):
 
         helpmenu=tk.Menu(menubar,tearoff=0,bg=MENU_COLOR,fg="white")
 
-        helpmenu.add_command(label="Sonnet files",command=lambda: self.read_pdf("tkinterstuff\sonnetfiles.pdf"))
-        helpmenu.add_command(label= "RF Measurements",command=lambda: self.read_pdf("tkinterstuff\realdatafiles.pdf"))
-        helpmenu.add_command(label="DC Measurements",command=lambda: self.read_pdf("tkinterstuff\dcfiles.pdf"))
+        helpmenu.add_command(label="Sonnet files",command=lambda: self.read_pdf("tutorial_files\sonnetfiles.html"))
+        helpmenu.add_command(label= "RF Measurements",command=lambda: self.read_pdf(r"tutorial_files\realdatafiles.html"))
+        helpmenu.add_command(label="DC Measurements",command=lambda: self.read_pdf("tutorial_files\dcfiles.html"))
         # helpmenu.add_separator()
         # helpmenu.add_command(label="How to read real data files",command=lambda: self.read_pdf("tkinterstuff\RealDataFiles.pdf"))
         # helpmenu.add_command(label="How real data is fitted",command=lambda: self.read_pdf("tkinterstuff\RealDataFitted.pdf"))
