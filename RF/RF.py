@@ -43,24 +43,32 @@ def smoothfunc(y, box_pts):
     y_smooth = np.convolve(y, box, mode='same')
     return y_smooth
 def find_resonance_range(x,y,tolerance=0.1):
-    #find the minimum of the data
-    xmin=x[np.argmin(y)]
     xinitial=x[0]
     xfinal=x[-1]
 
+    derivative=[]
+    for index in range(3,len(y)-3):
+        slope=np.polyfit(x[index-3:index+4],y[index-3:index+4],1)[0]
+        derivative.append(slope)
+    derivative=smoothfunc(smoothfunc(derivative,30),30)
     #find the value to the left of the minimum where the derivative absolute value is bigger than tolerance
-    for i in range(len(x)):
-        if x[i]<xmin:
-            if abs((y[i]-y[i-1])/(x[i]-x[i-1]))>tolerance:
-                xinitial=x[i]
-                break
-
+    for index in range(np.argmin(derivative),3,-1):
+        if abs(derivative[index-3])<tolerance:
+            xinitial=x[index]
+            break
     #find the value to the right of the minimum where the derivative absolute value is bigger than tolerance
-    for i in range(len(x)):
-        if x[i]>xmin:
-            if abs((y[i]-y[i-1])/(x[i]-x[i-1]))>tolerance:
-                xfinal=x[i]
-                break
+    for index in range(np.argmin(derivative),len(y)-3):
+        if abs(derivative[index-3])<tolerance:
+            xfinal=x[index]
+            break
+    fig,(ax1,ax2)=matplotlib.pyplot.subplots(2,1,sharex=True)
+    ax1.plot(x,y)
+    ax2.plot(x[3:-3],np.abs(derivative),'-o')
+    ax2.axvline(x=xinitial,color='r')
+    ax2.axvline(x=xfinal,color='r')
+    ax2.axhline(y=tolerance,color='g')
+    ax2.axvline(x=x[np.argmin(y)],color='b')
+    matplotlib.pyplot.show()
     return xinitial,xfinal  
 def find_resonance_range_2(x,y):
     xmiddle=(np.min(y)+np.max(y))/2
@@ -156,7 +164,7 @@ class Workspace(Windows):
         self.controlcanvas.add_object(Cbar)
         self.controlcanvas.move(-xsep,ysep)
 
-        CbarSweep=Navigator(self.controlcanvas,"colorbar_sweep",["T","P","B","Bx","By","Bz"],"cbar")
+        CbarSweep=Navigator(self.controlcanvas,"colorbar_sweep",["T","P","B","Bx","By","Bz","None"],"cbar")
         self.controlcanvas.add_object(CbarSweep)
         self.controlcanvas.move(xsep,0)
 
@@ -204,9 +212,12 @@ class Workspace(Windows):
         self.controlcanvas.add_object(ColorbarPrefix)
         self.controlcanvas.move(-xsep,ysep)
 
-        FitMode=Navigator(self.controlcanvas,"fit_range",["all in screen","automatic"],"fit mode")
+        FitMode=Navigator(self.controlcanvas,"fit_range",["all in screen","automatic","slope"],"fit mode")
         self.controlcanvas.add_object(FitMode)
         self.controlcanvas.move(xsep,0)
+
+        Tolerance=Entries(self.controlcanvas,["tolerance"],["tolerance (only slope mode)"],[float])
+        self.controlcanvas.add_object(Tolerance)
 
 
 
@@ -441,6 +452,11 @@ class Workspace(Windows):
             else:
                 first_value=0
                 last_value=0
+        elif self.parameters["colorbar_sweep"]=="None":
+            first_value=0
+            last_value=0
+            self.parameters["colorbar_title"]=""
+            self.itvector=np.zeros(self.freq.shape)
         colorbar_title=self.parameters["colorbar_title"]
 
         for j in range(sweep_list[0],sweep_list[1],sweep_list[2]):
@@ -527,6 +543,12 @@ class Workspace(Windows):
                 cond=np.logical_and(self.freq[i]>xmin*x_prefix_value,self.freq[i]<xmax*x_prefix_value)
                 self.xmin_list.append(xmin*x_prefix_value)
                 self.xmax_list.append(xmax*x_prefix_value)
+            elif fit_range=="slope":
+                tolerance=float(self.parameters["tolerance"])
+                xmin,xmax=find_resonance_range(self.freq[i],self.amplitude[i],tolerance)
+                cond=np.logical_and(self.freq[i]>xmin,self.freq[i]<xmax)
+                self.xmin_list.append(xmin)
+                self.xmax_list.append(xmax)
             elif fit_range=="automatic":
                 xmin,xmax=find_resonance_range_2(self.freq[i],self.amplitude[i])
                 cond=np.logical_and(self.freq[i]>xmin,self.freq[i]<xmax)
@@ -561,8 +583,14 @@ class Workspace(Windows):
                 self.fr_err_fit_list.append(np.nan)
             frmin=freq_crop[np.argmin(np.abs(amplitude_complex_crop))]
             self.frmin_fit_list.append(frmin)
-            self.temp_fit_list.append(self.temp[i][0])
-            self.power_fit_list.append(self.power[i][0])
+            try:
+                self.temp_fit_list.append(self.temp[i][0])
+            except:
+                pass
+            try:
+                self.power_fit_list.append(self.power[i][0])
+            except:
+                pass
         #Open a new window
         self.fitWindow=fitWindow(self,number_of_fits)
         self.fitWindow.mainloop()

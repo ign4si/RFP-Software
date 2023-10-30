@@ -1,7 +1,7 @@
 file 0
 colormap coolwarm
 fit_range automatic
-fit_tolerance 1e-6
+tolerance 1e-9
 yplot S21
 xlabel_fontsize 15
 ylabel_fontsize 15
@@ -24,6 +24,7 @@ grid_bool True
 ticks_fontsize 15
 guessdelay False
 baseline_file None
+colorbar_title None
 baseline_sweep 0
 baseline_shift 0
 smooth 0
