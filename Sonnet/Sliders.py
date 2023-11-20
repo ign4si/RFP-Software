@@ -19,6 +19,7 @@ def read_data_2(name): #This is a new version for reading data. When the data is
             file_type="ParamSweep"
         else:
             file_type="SingleSweep"
+        print(file_type)
         if file_type=="ParamSweep":
             for line in vec:#this will read the file line by line
                 contador+=1
@@ -52,10 +53,10 @@ def read_data_2(name): #This is a new version for reading data. When the data is
                 if contador>2:
                     try:
                         fq.append(float(line.split(",")[0]))
-                        s21.append(float(line.split(",")[5]))
-                        s21_phase.append(float(line.split(",")[6]))
+                        s21.append(float(line.split(",")[1]))
+                        s21_phase.append(float(line.split(",")[2]))
                     except:
-                        print(line)
+                        print(line.split(","))
                     if contador==numberoflines-1:
                         data_list.append(np.transpose(np.array([fq,s21,s21_phase])))
             file.close()

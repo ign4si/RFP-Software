@@ -5,10 +5,22 @@ import matplotlib.pyplot as plt
 from matplotlib.widgets import  Slider, Button
 import os
 from lmfit import Parameters, minimize,fit_report
+from scipy.signal import argrelextrema
+
+def find_deeps(y):
+    # Define a comparator for argrelextrema to find minima
+    comparator = np.less
+
+    # Find indices of relative minima
+    indices = argrelextrema(y, comparator)
+
+    return indices
+
 class Sonnet(Windows):
     def __init__(self, root,controller):
         super().__init__(root,controller)
         self.i=0
+        self.j=0
         self.filename=self.select_file()
         self.foldername=self.filename.split("/")[-1][:-4]
         self.read_data(self.filename)
@@ -21,7 +33,6 @@ class Sonnet(Windows):
     def update_frame(self):
         self.initialize_parameters()
         self.set_title()
-        self.ax[0].set_xlim([self.f[0],self.f[-1]])
         a_=self.init_fr
         b_ =self.init_Qc
         c_=self.init_Qi
@@ -35,6 +46,14 @@ class Sonnet(Windows):
     def backward(self,event): 
         if(self.i>0):
             self.i-=1
+        self.update_frame()
+    def change_min(self,event):
+        if(self.j<len(self.deeps[0])-1):
+            self.j+=1
+        elif(self.j==len(self.deeps[0])-1):
+            self.j=0
+        else:
+            print("There is only one minimum")
         self.update_frame()
     def fitandgo(self,funcs):
         def combined_func(*args, **kwargs):
@@ -54,11 +73,16 @@ class Sonnet(Windows):
         self.init_phi0= -50
         self.init_Qc = 100e3
         self.init_Qi =  0.1e6
-        self.init_fr = f_[np.argmin(amp_)] #Estimation of the resonante frequency
+        self.deeps=find_deeps(amp_)
+        if len(self.deeps[0])>1:
+            self.init_fr=f_[self.deeps[0][self.j]]
+        else:
+            self.init_fr=f_[np.argmin(amp_)]
         self.deltaphi=10
         self.deltafr=0.001
         self.deltaQc=40e3
         self.deltaQi=0.05e6
+
 
         f=[]
         amp=[]
@@ -138,6 +162,7 @@ class Sonnet(Windows):
         forwardax = plt.axes([0.9, 0.95, 0.04, 0.04])
         backwardax = plt.axes([0.1, 0.95, 0.04, 0.04])
         fitandgoax=plt.axes([0.9, 0.85, 0.04, 0.04])
+        change_min=plt.axes([0.9, 0.75, 0.04, 0.04])
 
 
         button = Button(resetax, 'Reset', hovercolor='0.975')
@@ -147,10 +172,11 @@ class Sonnet(Windows):
         button5 = Button(forwardax, 'Go next', hovercolor='0.975')
         button6 = Button(backwardax, 'Go back', hovercolor='0.975')
         button7 = Button(fitandgoax, 'Fit and Go', hovercolor='0.975')
+        button8 = Button(change_min, 'Change min', hovercolor='0.975')
 
-        self.buttons=[button,button2,button3,button4,button5,button6,button7]
-        self.buttons_axis=[resetax,parametsax,fitax,startaigan,forwardax,backwardax,fitandgoax]
-        self.buttons_functions=[self.reset,self.getpars,self.fit,self.start,self.forward,self.backward,self.fitandgo([self.fit,self.getpars,self.forward])]
+        self.buttons=[button,button2,button3,button4,button5,button6,button7,button8]
+        self.buttons_axis=[resetax,parametsax,fitax,startaigan,forwardax,backwardax,fitandgoax,change_min]
+        self.buttons_functions=[self.reset,self.getpars,self.fit,self.start,self.forward,self.backward,self.fitandgo([self.fit,self.getpars,self.forward]),self.change_min]
         for i in range(len(self.buttons)):
             self.buttons[i].on_clicked(self.buttons_functions[i])
     def update_dataplot(self):

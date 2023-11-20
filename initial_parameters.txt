@@ -3,14 +3,14 @@ colormap coolwarm
 fit_range automatic
 tolerance 1e-9
 yplot S21
-xlabel_fontsize 15
-ylabel_fontsize 15
+xlabel_fontsize 19
+ylabel_fontsize 19
 x_prefix G
 title None
-title_fontsize 15
+title_fontsize 19
 colorbar_sweep T
 colorbar_bool True
-colorbar_fontsize 15
+colorbar_fontsize 19
 colorbar_prefix 
 xscale linear
 yscale linear
@@ -21,7 +21,7 @@ marker .
 ticks_in True
 shift 0
 grid_bool True
-ticks_fontsize 15
+ticks_fontsize 19
 guessdelay False
 baseline_file None
 colorbar_title None

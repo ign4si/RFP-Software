@@ -110,8 +110,8 @@ class Workspace(Windows):
                              command=lambda: self.controller.back_to_start())
         button1.pack(fill='x',pady=10, padx=10)
 
-        self.leftframe=tk.Frame(self,width=SIZE_X-200)
-        self.rightframe=tk.Frame(self,width=200)
+        self.leftframe=tk.Frame(self,width=SIZE_X-300)
+        self.rightframe=tk.Frame(self,width=300)
         self.leftframe.pack(side='left',fill='both',expand=True)
         self.rightframe.pack(side='right',fill='both',expand=False)
         #create the figure 
@@ -212,7 +212,7 @@ class Workspace(Windows):
         self.controlcanvas.add_object(ColorbarPrefix)
         self.controlcanvas.move(-xsep,ysep)
 
-        FitMode=Navigator(self.controlcanvas,"fit_range",["all in screen","automatic","slope"],"fit mode")
+        FitMode=Navigator(self.controlcanvas,"fit_range",["all in screen","automatic"],"fit mode")
         self.controlcanvas.add_object(FitMode)
         self.controlcanvas.move(xsep,0)
 
@@ -512,6 +512,7 @@ class Workspace(Windows):
 
 
         self.canvas.draw()
+        self.f.savefig("image.pdf",bbox_inches='tight')
 
 
         
@@ -543,12 +544,6 @@ class Workspace(Windows):
                 cond=np.logical_and(self.freq[i]>xmin*x_prefix_value,self.freq[i]<xmax*x_prefix_value)
                 self.xmin_list.append(xmin*x_prefix_value)
                 self.xmax_list.append(xmax*x_prefix_value)
-            elif fit_range=="slope":
-                tolerance=float(self.parameters["tolerance"])
-                xmin,xmax=find_resonance_range(self.freq[i],self.amplitude[i],tolerance)
-                cond=np.logical_and(self.freq[i]>xmin,self.freq[i]<xmax)
-                self.xmin_list.append(xmin)
-                self.xmax_list.append(xmax)
             elif fit_range=="automatic":
                 xmin,xmax=find_resonance_range_2(self.freq[i],self.amplitude[i])
                 cond=np.logical_and(self.freq[i]>xmin,self.freq[i]<xmax)
