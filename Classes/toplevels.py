@@ -244,6 +244,7 @@ class fitWindow(tk.Toplevel):
         fw_xlabel_fontsize=self.controller.parameters["fw_xlabel_fontsize"]
         fw_ylabel_fontsize=self.controller.parameters["fw_ylabel_fontsize"]
         fw_suptitle_fontsize=self.controller.parameters["fw_title_fontsize"]
+        fw_ticks_fontsize=self.controller.parameters["fw_ticks_fontsize"]
 
         x_prefix=self.controller.parameters["x_prefix"]
         colorbar_prefix=self.controller.parameters["colorbar_prefix"]
@@ -264,8 +265,14 @@ class fitWindow(tk.Toplevel):
         self.ax1.grid(fw_grid_bool)
         self.ax2.grid(fw_grid_bool)
         self.ax3.grid(fw_grid_bool)
+        self.ax1.tick_params(axis='both', labelsize=fw_ticks_fontsize)
+        self.ax2.tick_params(axis='both', labelsize=fw_ticks_fontsize)
+        self.ax3.tick_params(axis='both', labelsize=fw_ticks_fontsize)
+
         self.fig.suptitle(fw_suptitle, fontsize=fw_suptitle_fontsize)
         self.canvas.draw()
+        
+        self.fig.savefig("image_fit.pdf",dpi=100)
     def save(self):
         #ask for a folder and a filename
         filename = tk.filedialog.asksaveasfilename(title="Select file",filetypes=(("txt files","*.txt"),("all files","*.*")))

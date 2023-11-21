@@ -46,12 +46,13 @@ cp_ticks_fontsize 15
 fw_ylabel_1 $\mathrm{f}_{\mathrm{r}}\mathrm{(GHz)}$
 fw_ylabel_2 $\mathrm{Q}_\mathrm{i}$
 fw_ylabel_3 $\mathrm{Q}_\mathrm{i}$
-fw_xlabel_fontsize 15
-fw_ylabel_fontsize 15
+fw_xlabel_fontsize 20
+fw_ylabel_fontsize 20
 fw_suptitle_fontsize 15
 fw_grid_bool False
 fw_suptitle None
-fw_title_fontsize 15
+fw_title_fontsize 20
+fw_ticks_fontsize 20
 sweep_ini 0
 sweep_end -1
 sweep_step 1
