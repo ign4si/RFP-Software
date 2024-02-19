@@ -76,21 +76,33 @@ def find_resonance_range_2(x,y):
     resonance_width=x[idx[1]]-x[idx[0]]
     xmin=x[np.argmin(y)]-3*resonance_width
     xmax=x[np.argmin(y)]+3*resonance_width
-
-    # matplotlib.pyplot.plot(x,y)
-    # matplotlib.pyplot.axvline(x=xmin,color='r')
-    # matplotlib.pyplot.axvline(x=xmax,color='r')
-    # matplotlib.pyplot.axvline(x=x[idx[0]],color='g')
-    # matplotlib.pyplot.axvline(x=x[idx[1]],color='g')
-    # matplotlib.pyplot.axvline(x=x[np.argmin(y)],color='b')
-    # matplotlib.pyplot.axvline(x=x[np.argmin(y)]+resonance_width,color='b',linestyle='--')
-    # matplotlib.pyplot.axvline(x=x[np.argmin(y)]+2*resonance_width,color='b',linestyle='--')
-
-    # matplotlib.pyplot.axhline(y=xmiddle)
-    # matplotlib.pyplot.show()
-
     return xmin,xmax
+def find_resonance_range_simon(x,y,window_size=50,coef=1.5):
+    #calculate the derivative of the data, take a window of 100 points
+    derivative=[]
+    for index in range(0,len(y)-window_size):
+        slope=np.polyfit(x[index:index+window_size],y[index:index+window_size],1)[0]
+        derivative.append(slope)
+    derivative=np.array(derivative)
+    #find the minimum of the derivative
+    points_to_fit=int(coef*(np.argmax(derivative)-np.argmin(derivative)))
+    xmin=np.argmin(derivative)
+    xmax=np.argmax(derivative)
+    xderivative=x[:len(derivative)]
+    index=np.argmin(np.abs(derivative[np.logical_and(xderivative>xderivative[xmin],xderivative<xderivative[xmax])]))
+    index=index+xmin
 
+    # fig,(ax1,ax2)=matplotlib.pyplot.subplots(2,1)
+    # ax1.plot(x,y)
+    # ax1.plot(x[index],y[index],'o',color='blue')
+    # ax1.plot(x[np.argmin(y)],y[np.argmin(y)],'o',color='r')
+    # ax1.legend(["data","minimum from simon criteria","minimum of the data"])
+    # ax2.plot(xderivative,derivative)
+    # ax2.axvline(x=x[index],color='blue')
+    # ax2.axvline(x=x[xmin],color='r')
+    # ax2.axvline(x=x[xmax],color='r')
+    # matplotlib.pyplot.show()
+    return find_resonance_range_2(x,y)
 
 
 class Workspace(Windows):
@@ -212,12 +224,12 @@ class Workspace(Windows):
         self.controlcanvas.add_object(ColorbarPrefix)
         self.controlcanvas.move(-xsep,ysep)
 
-        FitMode=Navigator(self.controlcanvas,"fit_range",["all in screen","automatic"],"fit mode")
+        FitMode=Navigator(self.controlcanvas,"fit_range",["all in screen","automatic","slope criteria"],"fit mode")
         self.controlcanvas.add_object(FitMode)
         self.controlcanvas.move(xsep,0)
 
-        Tolerance=Entries(self.controlcanvas,["tolerance"],["tolerance (only slope mode)"],[float])
-        self.controlcanvas.add_object(Tolerance)
+        SavePlotButton=FunctionButtons(self.controlcanvas,lambda: self.f.savefig("image.png",bbox_inches='tight'),"Save Plot")
+        self.controlcanvas.add_object(SavePlotButton)
 
 
 
@@ -512,7 +524,6 @@ class Workspace(Windows):
 
 
         self.canvas.draw()
-        self.f.savefig("image.pdf",bbox_inches='tight')
 
 
         
@@ -546,6 +557,11 @@ class Workspace(Windows):
                 self.xmax_list.append(xmax*x_prefix_value)
             elif fit_range=="automatic":
                 xmin,xmax=find_resonance_range_2(self.freq[i],self.amplitude[i])
+                cond=np.logical_and(self.freq[i]>xmin,self.freq[i]<xmax)
+                self.xmin_list.append(xmin)
+                self.xmax_list.append(xmax)
+            elif fit_range=="slope criteria":
+                xmin,xmax=find_resonance_range_simon(self.freq[i],self.amplitude[i])
                 cond=np.logical_and(self.freq[i]>xmin,self.freq[i]<xmax)
                 self.xmin_list.append(xmin)
                 self.xmax_list.append(xmax)

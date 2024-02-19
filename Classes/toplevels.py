@@ -431,6 +431,8 @@ class OnePointFitWindow(tk.Toplevel):
         self.controlcanvas.pack(fill='x',expand=True)
     def fit_button_function(self):
         xmin,xmax=self.ax2.get_xlim()
+        self.controller.xmin_list[self.index_crop]=xmin*1e9
+        self.controller.xmax_list[self.index_crop]=xmax*1e9
         self.cond=np.logical_and(self.x>(xmin*1e9),self.x<(xmax*1e9))
         self.fit()
         self.plot()
